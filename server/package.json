@@ -6,8 +6,12 @@
   "scripts": {
     "build": "tsc",
     "dev": "nodemon",
+    "start": "node dist/main.js",
     "test:watch": "jest --watch",
-    "test": "jest"
+    "test": "jest",
+    "format": "prettier --write '**/*.{js,json,ts}'",
+    "tscheck": "tsc --noEmit --pretty",
+    "lint": "eslint --cache --fix './src/**/*.{js,json,ts}'"
   },
   "author": "Sebastian Matias Segura (@seb7887)",
   "license": "ISC",
@@ -15,6 +19,13 @@
     "@nestjs/testing": "^6.11.6",
     "@types/jest": "^25.1.2",
     "@types/node": "^13.7.0",
+    "@typescript-eslint/eslint-plugin": "^2.19.0",
+    "@typescript-eslint/parser": "^2.19.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "husky": "^4.2.1",
+    "lint-staged": "^10.0.7",
     "nodemon": "^2.0.2",
     "prettier": "^1.19.1",
     "ts-jest": "^25.2.0",
@@ -22,7 +33,20 @@
     "typescript": "^3.7.5"
   },
   "dependencies": {
-    "@nestjs/core": "^6.11.6"
+    "@nestjs/common": "^6.11.6",
+    "@nestjs/core": "^6.11.6",
+    "@nestjs/platform-express": "^6.11.6",
+    "@nestjs/swagger": "^4.2.6",
+    "@nestjs/typeorm": "^6.2.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^8.5.1",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "pg": "^7.18.1",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^6.5.4",
+    "swagger-ui-express": "^4.1.3",
+    "typeorm": "^0.2.22"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -37,5 +61,15 @@
     },
     "coverageDirectory": "./coverage",
     "testEnvironment": "node"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm run tscheck"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts}": "eslint --cache --fix",
+    "*.{js,json,ts,md}": "prettier --write"
   }
 }
