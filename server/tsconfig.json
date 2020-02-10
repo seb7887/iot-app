@@ -13,6 +13,6 @@
     "allowJs": true,
     "outDir": "./dist"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "migration"],
   "exclude": ["node_modules", "**/*.test.ts"]
 }
