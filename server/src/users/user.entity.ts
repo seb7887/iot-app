@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert } from 'typeorm'
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  BeforeInsert,
+  CreateDateColumn,
+  UpdateDateColumn
+} from 'typeorm'
 import { IsEmail } from 'class-validator'
 import * as bcrypt from 'bcrypt'
 
@@ -31,4 +38,10 @@ export class UserEntity {
 
   @Column({ type: 'enum', enum: RoleType, default: RoleType.USER })
   role: RoleType
+
+  @CreateDateColumn()
+  createdAt: Date
+
+  @UpdateDateColumn()
+  updatedAt: Date
 }

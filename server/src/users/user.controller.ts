@@ -17,12 +17,12 @@ export class UserController {
   }
 
   @Post('users')
-  async create(@Body('user') userData: CreateUserDto) {
+  async create(@Body() userData: CreateUserDto) {
     return this.userService.create(userData)
   }
 
   @Post('users/login')
-  async login(@Body('user') loginUserDto: LoginUserDto): Promise<UserRO> {
+  async login(@Body() loginUserDto: LoginUserDto): Promise<UserRO> {
     const _user = await this.userService.findOne(loginUserDto)
 
     const errors = { User: 'Not Found' }

@@ -2,7 +2,7 @@ import { Injectable, HttpStatus } from '@nestjs/common'
 import { HttpException } from '@nestjs/common/exceptions/http.exception'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, getRepository } from 'typeorm'
-import * as jwt from 'jsonwebtoken'
+import { sign } from 'jsonwebtoken'
 import * as bcrypt from 'bcrypt'
 import { validate } from 'class-validator'
 
@@ -23,15 +23,23 @@ export class UserService {
   }
 
   async findOne(loginUserDto: LoginUserDto): Promise<UserEntity> {
-    const options = {
-      email: loginUserDto.email,
-      password: bcrypt.hashSync(loginUserDto.password, 10)
+    const { email, password } = loginUserDto
+    const user = await this.userRepository.findOne({ email })
+
+    if (!user) {
+      return null
     }
 
-    return this.userRepository.findOne(options)
+    const isValid = bcrypt.compareSync(password, user.password)
+
+    return isValid ? user : null
   }
 
   async create(dto: CreateUserDto): Promise<UserRO> {
+    if (!dto) {
+      throw new HttpException('Missing properties', HttpStatus.BAD_REQUEST)
+    }
+
     const { username, email, password, role } = dto
     const qb = getRepository(UserEntity)
       .createQueryBuilder('users')
@@ -89,7 +97,7 @@ export class UserService {
     const exp = new Date(today)
     exp.setDate(today.getDate() + 60)
 
-    return jwt.sign(
+    return sign(
       {
         id: user.id,
         username: user.username,

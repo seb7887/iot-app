@@ -11,7 +11,9 @@ export class Devices1581294310140 implements MigrationInterface {
           "client_id" character varying NOT NULL,
           "password" character varying NOT NULL,
           "connected" BOOL NOT NULL DEFAULT false,
-          "properties" JSONB NOT NULL
+          "properties" JSONB NOT NULL,
+          "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
       `)
   }
