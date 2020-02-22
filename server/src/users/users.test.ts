@@ -27,7 +27,9 @@ describe('Users', () => {
         })
       ]
     }).compile()
+
     app = module.createNestApplication()
+    repository = module.get('UserEntityRepository')
     await app.init()
   })
 
@@ -51,13 +53,11 @@ describe('Users', () => {
         .send(newUser)
         .expect(201)
 
-      expect(body).toEqual({
-        username: 'test',
-        email: 'test@test.com',
-        token: expect.any(String),
-        role: 'admin',
-        avatar: null
-      })
+      expect(body.user).toBeDefined()
+      expect(body.user.username).toEqual('test')
+      expect(body.user.email).toEqual('test@test.com')
+      expect(body.user.token).toEqual(expect.any(String))
+      expect(body.user.role).toEqual('admin')
     })
   })
 
