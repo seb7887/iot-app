@@ -5,8 +5,8 @@ export class Logs1581799796144 implements MigrationInterface {
     await queryRunner.query(`
         CREATE TABLE "logs"
         (
-            "id" SERIAL NOT NULL PRIMARY KEY,
-            "device_id" INTEGER NOT NULL REFERENCES "devices" ("id"),
+            "id" UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+            "device_id" UUID NOT NULL REFERENCES "devices" ("id"),
             "connected" BOOL NOT NULL DEFAULT false,
             "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP 
         )
