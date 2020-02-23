@@ -15,9 +15,9 @@ export enum RoleType {
 }
 
 @Entity({ name: 'users' })
-export class UserEntity {
+export class User {
   @PrimaryGeneratedColumn()
-  id: number
+  id: string
 
   @Column({ unique: true, nullable: false })
   @IsEmail()
@@ -32,6 +32,9 @@ export class UserEntity {
   hashPassword() {
     this.password = bcrypt.hashSync(this.password, 10)
   }
+
+  @Column({ nullable: true, name: 'group_id' })
+  groupId: string
 
   @Column({ nullable: true })
   avatar: string

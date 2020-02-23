@@ -12,6 +12,8 @@ export class CreateUserDto {
   @IsNotEmpty()
   readonly password: string
 
+  readonly groupId: string | null
+
   @IsNotEmpty()
   readonly role: RoleType
 }

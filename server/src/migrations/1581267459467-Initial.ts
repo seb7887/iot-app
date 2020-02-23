@@ -20,6 +20,7 @@ export class Users1581267459467 implements MigrationInterface {
         "email" character varying NOT NULL UNIQUE,
         "username" character varying NOT NULL,
         "password" character varying NOT NULL,
+        "group_id" UUID REFERENCES "groups" ("id") ON DELETE CASCADE,
         "avatar" character varying,
         "role" "user_role" NOT NULL DEFAULT 'user',
         "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

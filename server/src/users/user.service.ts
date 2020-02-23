@@ -7,22 +7,22 @@ import * as bcrypt from 'bcrypt'
 import { validate } from 'class-validator'
 
 import { SECRET } from '../config'
-import { UserEntity } from './user.entity'
+import { User } from './user.entity'
 import { CreateUserDto, LoginUserDto } from './dto'
 import { UserRO } from './user.interface'
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>
   ) {}
 
-  async findAll(): Promise<UserEntity[]> {
+  async findAll(): Promise<User[]> {
     return this.userRepository.find()
   }
 
-  async findOne(loginUserDto: LoginUserDto): Promise<UserEntity> {
+  async findOne(loginUserDto: LoginUserDto): Promise<User> {
     const { email, password } = loginUserDto
     const user = await this.userRepository.findOne({ email })
 
@@ -40,8 +40,8 @@ export class UserService {
       throw new HttpException('Missing properties', HttpStatus.BAD_REQUEST)
     }
 
-    const { username, email, password, role } = dto
-    const qb = getRepository(UserEntity)
+    const { username, email, password, groupId, role } = dto
+    const qb = getRepository(User)
       .createQueryBuilder('users')
       .where('users.username = :username', { username })
       .orWhere('users.email = :email', { email })
@@ -57,10 +57,11 @@ export class UserService {
     }
 
     // Create new user
-    const newUser = new UserEntity()
+    const newUser = new User()
     newUser.username = username
     newUser.email = email
     newUser.password = password
+    newUser.groupId = groupId
     newUser.role = role
 
     const errors = await validate(newUser)
@@ -76,7 +77,7 @@ export class UserService {
     }
   }
 
-  async findById(id: number): Promise<UserRO> {
+  async findById(id: string): Promise<UserRO> {
     const user = await this.userRepository.findOne(id)
 
     if (!user) {
@@ -108,11 +109,13 @@ export class UserService {
     )
   }
 
-  private buildUserRO(user: UserEntity) {
+  private buildUserRO(user: User) {
     const userRO = {
+      id: user.id,
       username: user.username,
       email: user.email,
       token: this.generateJWT(user),
+      groupId: user.groupId,
       role: user.role,
       avatar: user.avatar
     }

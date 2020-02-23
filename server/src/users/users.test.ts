@@ -4,12 +4,12 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import * as supertest from 'supertest'
 
-import { UserEntity } from './user.entity'
+import { User } from './user.entity'
 import { UserModule } from './user.module'
 
 describe('Users', () => {
   let app: INestApplication
-  let repository: Repository<UserEntity>
+  let repository: Repository<User>
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
@@ -29,7 +29,7 @@ describe('Users', () => {
     }).compile()
 
     app = module.createNestApplication()
-    repository = module.get('UserEntityRepository')
+    repository = module.get('UserRepository')
     await app.init()
   })
 
@@ -57,6 +57,7 @@ describe('Users', () => {
       expect(body.user.username).toEqual('test')
       expect(body.user.email).toEqual('test@test.com')
       expect(body.user.token).toEqual(expect.any(String))
+      expect(body.user.groupId).toEqual(null)
       expect(body.user.role).toEqual('admin')
     })
   })
