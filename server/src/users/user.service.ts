@@ -103,6 +103,7 @@ export class UserService {
         id: user.id,
         username: user.username,
         email: user.email,
+        groupId: user.groupId,
         exp: exp.getTime() / 1000
       },
       SECRET

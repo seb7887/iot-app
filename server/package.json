@@ -50,6 +50,8 @@
     "bcrypt": "^3.0.8",
     "class-validator": "^0.11.0",
     "jsonwebtoken": "^8.5.1",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
     "pg": "^7.18.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.5.4",

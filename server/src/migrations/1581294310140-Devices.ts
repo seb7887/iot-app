@@ -6,7 +6,7 @@ export class Devices1581294310140 implements MigrationInterface {
         CREATE TABLE "devices"
         (
           "id" UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
-          "group_id" UUID NOT NULL REFERENCES "groups" ("id") ON DELETE CASCADE,
+          "group_id" UUID NOT NULL REFERENCES "groups"("id") ON DELETE CASCADE,
           "serial" character varying NOT NULL UNIQUE,
           "password" character varying NOT NULL,
           "connected" BOOL NOT NULL DEFAULT false,

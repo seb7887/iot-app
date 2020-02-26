@@ -6,7 +6,7 @@ import { validate } from 'class-validator'
 
 import { Group } from './group.entity'
 import { CreateGroupDto, ListGroupsDto } from './dto'
-import { GroupRO, GroupListRO } from './group.interface'
+import { GroupData, GroupRO, GroupListRO } from './group.interface'
 
 @Injectable()
 export class GroupService {
@@ -27,12 +27,16 @@ export class GroupService {
   }
 
   async getHierarchy(id: string): Promise<string[]> {
-    return getRepository(Group)
-      .query(`WITH RECURSIVE hierarchy(id, parent_id) AS (
-        SELECT id, parent_id FROM groups WHERE id = ${id}
+    const hierarchy = await getRepository(Group).query(
+      `WITH RECURSIVE hierarchy(id, parent_id) AS (
+        SELECT id, parent_id FROM groups WHERE id = $1
         UNION ALL
         SELECT g.id, g.parent_id FROM groups g INNER JOIN hierarchy h ON g.parent_id = h.id
-      ) SELECT id from hierarchy`)
+      ) SELECT id from hierarchy`,
+      [id]
+    )
+
+    return hierarchy.map(h => h.id)
   }
 
   async hasPermissions(userGroupId: string, groupId: string): Promise<boolean> {
@@ -41,25 +45,23 @@ export class GroupService {
     return ids.includes(groupId)
   }
 
-  async findAll(dto: ListGroupsDto): Promise<GroupListRO[]> {
-    const groups = await this.groupRepository.find()
+  async listGroups(dto: ListGroupsDto): Promise<GroupListRO> {
+    const { id, role, parentId, name, sortBy, sortOrder, pageSize, page } = dto
+    const isAdmin = role === 'admin'
 
-    return this.buildGroupListRO(groups)
-  }
+    const subgroups = id && !isAdmin ? await this.getHierarchy(id) : null
 
-  async listGroups(dto: ListGroupsDto): Promise<Group[]> {
-    const { id, parentId, sortBy, sortOrder, pageSize, page } = dto
+    const [groups, count] = await getRepository(Group)
+      .createQueryBuilder('groups')
+      .where(subgroups ? 'groups.id IN (:...subgroups)' : '1=1', { subgroups })
+      .andWhere(parentId ? `groups.parent_id = :parentId` : `1=1`, { parentId })
+      .andWhere(name ? `groups.name LIKE '%${name}%'` : '1=1')
+      .orderBy(sortBy)
+      .limit(pageSize)
+      .offset(Number(page) - 1)
+      .getManyAndCount()
 
-    const subgroups = await this.getHierarchy(id)
-
-    const groups = await getRepository(
-      Group
-    ).query(
-      `SELECT * FROM groups WHERE (id IN ($1:csv) or $1 is null) AND (parent_id = $2 or $2 is null) ORDER BY ${sortBy} ${sortOrder} LIMIT $3 OFFSET $4`,
-      [subgroups, parentId, pageSize, page]
-    )
-
-    return this.buildGroupListRO(groups as Group[], page, pageSize, sortOrder)
+    return this.buildGroupListRO(groups, count, page, pageSize, sortOrder)
   }
 
   async create(dto: CreateGroupDto): Promise<GroupRO> {
@@ -111,15 +113,22 @@ export class GroupService {
   }
 
   private buildGroupListRO(
-    groups: any,
+    groups: Group[],
+    count: number,
     page: number,
     pageSize: number,
     sortOrder: string
   ): GroupListRO {
+    const groupsRO: GroupData[] = groups.map(g => ({
+      id: g.id,
+      name: g.name,
+      parentId: g.parentId
+    }))
+
     return {
-      groups,
+      groups: groupsRO,
       meta: {
-        count: groups.length,
+        count,
         page,
         pageSize,
         sortOrder

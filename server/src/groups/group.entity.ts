@@ -2,11 +2,10 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn
+  CreateDateColumn
 } from 'typeorm'
 
-@Entity({ name: 'groups ' })
+@Entity({ name: 'groups' })
 export class Group {
   @PrimaryGeneratedColumn()
   id: string
@@ -19,7 +18,4 @@ export class Group {
 
   @CreateDateColumn()
   createdAt: Date
-
-  @UpdateDateColumn()
-  updatedAt: Date
 }

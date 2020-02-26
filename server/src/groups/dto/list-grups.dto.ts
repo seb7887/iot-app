@@ -5,9 +5,12 @@ export class ListGroupsDto {
   @IsUUID()
   readonly id: string
 
+  @IsNotEmpty()
+  readonly role: string
+
   readonly name: string | null
 
-  readonly parentId: string | null
+  readonly parentId?: string
 
   @IsNotEmpty()
   readonly sortBy: string
@@ -19,5 +22,5 @@ export class ListGroupsDto {
   readonly pageSize: number
 
   @IsNotEmpty()
-  readonly page: number | null
+  readonly page: number
 }

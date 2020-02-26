@@ -31,8 +31,8 @@ export class UserController {
     }
 
     const token = this.userService.generateJWT(_user)
-    const { email, username, role, avatar } = _user
-    const user = { email, token, username, role, avatar }
+    const { id, email, username, role, avatar, groupId } = _user
+    const user = { id, email, token, username, role, avatar, groupId }
 
     return {
       user
