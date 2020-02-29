@@ -4,12 +4,12 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import * as supertest from 'supertest'
 
-import { User } from '../users/user.entity'
-import { UserModule } from '../users/user.module'
-import { Group } from './group.entity'
-import { GroupModule } from './group.module'
+import { User } from './users/user.entity'
+import { UserModule } from './users/user.module'
+import { Group } from './groups/group.entity'
+import { GroupModule } from './groups/group.module'
 
-describe('Groups', () => {
+describe('App', () => {
   let app: INestApplication
   let usersRepository: Repository<User>
   let groupsRepository: Repository<Group>
@@ -67,15 +67,56 @@ describe('Groups', () => {
     await app.close()
   })
 
-  describe('POST /groups', () => {
-    it('dummy', () => expect(true).toBe(true))
-  })
+  describe('Users', () => {
+    describe('POST /users', () => {
+      it('should create a new user', async () => {
+        const newUser = {
+          username: 'test',
+          email: 'test@test.com',
+          password: 'test',
+          role: 'admin'
+        }
 
-  describe('GET /groups', () => {
-    it('dummy', () => expect(true).toBe(true))
-  })
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .post('/users')
+          .send(newUser)
+          .expect(201)
 
-  describe('GET /group/:id', () => {
-    it('dummy', () => expect(true).toBe(true))
+        expect(body.user).toBeDefined()
+        expect(body.user.username).toEqual('test')
+        expect(body.user.email).toEqual('test@test.com')
+        expect(body.user.token).toEqual(expect.any(String))
+        expect(body.user.groupId).toEqual(null)
+        expect(body.user.role).toEqual('admin')
+      })
+    })
+
+    describe('POST users/login', () => {
+      it('returns 201', async () => {
+        const credentials = {
+          email: 'test@test.com',
+          password: 'test'
+        }
+
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .post('/users/login')
+          .send(credentials)
+          .expect(201)
+
+        expect(body).toEqual({
+          user: {
+            email: 'test@test.com',
+            token: expect.any(String),
+            groupId: null,
+            id: expect.any(String),
+            username: 'test',
+            role: 'admin',
+            avatar: null
+          }
+        })
+      })
+    })
   })
 })
