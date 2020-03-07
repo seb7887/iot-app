@@ -3,16 +3,33 @@ import { Test } from '@nestjs/testing'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import * as supertest from 'supertest'
+import * as bcrypt from 'bcrypt'
 
 import { User } from './users/user.entity'
 import { UserModule } from './users/user.module'
 import { Group } from './groups/group.entity'
 import { GroupModule } from './groups/group.module'
 
+const userLogin = async (
+  credentials: Record<string, string>,
+  app: INestApplication
+) => {
+  const { body } = await supertest
+    .agent(app.getHttpServer())
+    .post('/users/login')
+    .send(credentials)
+    .expect(201)
+
+  return body.user.token
+}
+
 describe('App', () => {
   let app: INestApplication
   let usersRepository: Repository<User>
   let groupsRepository: Repository<Group>
+  let groupsIds: string[]
+  let token: string
+  let id: string
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
@@ -46,16 +63,17 @@ describe('App', () => {
     RETURNING *`,
       [parentGroup.id]
     )
-    const groupsIds = subgroupsLevel1.map(subgroup => subgroup.id)
+    groupsIds = subgroupsLevel1.map(subgroup => subgroup.id)
     await groupsRepository.query(
       `INSERT INTO groups (name, parent_id) VALUES ('sub_1', $1), ('sub_2', $1)`,
       [groupsIds[0]]
     )
 
     // Users data
+    const hash = bcrypt.hashSync('test', 10)
     await usersRepository.query(
-      `INSERT INTO users (username, email, password, role, group_id) VALUES ('admin', 'admin@admin.com', 'test', 'admin', null), ('user', 'user@user.com', 'test', 'user', $1)`,
-      [groupsIds[0]]
+      `INSERT INTO users (username, email, password, role, group_id) VALUES ('admin', 'admin@admin.com', $1, 'admin', null), ('user', 'user@user.com', $1, 'user', $2)`,
+      [hash, groupsIds[0]]
     )
 
     await app.init()
@@ -104,6 +122,7 @@ describe('App', () => {
           .post('/users/login')
           .send(credentials)
           .expect(201)
+        token = body.user.token
 
         expect(body).toEqual({
           user: {
@@ -116,6 +135,79 @@ describe('App', () => {
             avatar: null
           }
         })
+      })
+    })
+  })
+
+  describe('Groups', () => {
+    describe('POST /groups', () => {
+      it('should create a new group', async () => {
+        const newGroup = {
+          name: 'test',
+          parentId: groupsIds[1]
+        }
+
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .post('/groups')
+          .set('Authorization', `Bearer ${token}`)
+          .send(newGroup)
+          .expect(201)
+        id = body.group.id
+
+        expect(body.group).toBeDefined()
+        expect(body.group).toEqual({
+          id: expect.any(String),
+          ...newGroup
+        })
+      })
+    })
+
+    describe('GET /groups/:id', () => {
+      it('should return group info', async () => {
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .get(`/groups/${id}`)
+          .expect(200)
+
+        expect(body.group).toBeDefined()
+        expect(body.group).toEqual({
+          id,
+          name: 'test',
+          parentId: groupsIds[1]
+        })
+      })
+    })
+
+    describe('GET /groups', () => {
+      it('should return all groups if user is admin', async () => {
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .get('/groups?sortBy=id&pageSize=8&page=1')
+          .set('Authorization', `Bearer ${token}`)
+          .expect(200)
+
+        expect(body.groups).toBeDefined()
+        expect(body.groups).toHaveLength(6)
+      })
+
+      it('should return only group hierarchy if user is not admin', async () => {
+        token = await userLogin(
+          {
+            email: 'user@user.com',
+            password: 'test'
+          },
+          app
+        )
+
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .get('/groups?sortBy=id&pageSize=8&page=1')
+          .set('Authorization', `Bearer ${token}`)
+          .expect(200)
+
+        expect(body.groups).toBeDefined()
+        expect(body.groups).toHaveLength(3)
       })
     })
   })

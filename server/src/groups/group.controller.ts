@@ -36,7 +36,7 @@ export class GroupController {
     })
   }
 
-  @Get('group/:id')
+  @Get('groups/:id')
   async findOne(@Param('id') id: string): Promise<GroupRO> {
     return this.groupService.findById(id)
   }
