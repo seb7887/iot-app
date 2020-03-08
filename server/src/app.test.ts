@@ -111,7 +111,7 @@ describe('App', () => {
     })
 
     describe('POST users/login', () => {
-      it('returns 201', async () => {
+      it('should login a user', async () => {
         const credentials = {
           email: 'test@test.com',
           password: 'test'
@@ -123,6 +123,7 @@ describe('App', () => {
           .send(credentials)
           .expect(201)
         token = body.user.token
+        id = body.user.id
 
         expect(body).toEqual({
           user: {
@@ -139,7 +140,7 @@ describe('App', () => {
     })
 
     describe('POST users/validate-jwt', () => {
-      it('returns 200', async () => {
+      it('should validate a JWT', async () => {
         const { body } = await supertest
           .agent(app.getHttpServer())
           .post('/users/validate-jwt')
@@ -148,6 +149,34 @@ describe('App', () => {
 
         expect(body).toBeDefined()
         expect(body.isValid).toBeTruthy()
+      })
+    })
+
+    describe('PUT users/:id', () => {
+      it('should update a user', async () => {
+        const newData = {
+          email: 'test@test.com',
+          username: 'changed',
+          avatar: 'test_avatar'
+        }
+
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .put(`/users/${id}`)
+          .set('Authorization', `Bearer ${token}`)
+          .send(newData)
+          .expect(200)
+
+        expect(body).toBeDefined()
+        expect(body.user).toEqual({
+          email: newData.email,
+          username: newData.username,
+          avatar: newData.avatar,
+          id,
+          token: expect.any(String),
+          role: 'admin',
+          groupId: null
+        })
       })
     })
   })

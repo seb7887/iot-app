@@ -1,7 +1,20 @@
-import { Get, Post, Body, Controller, HttpException } from '@nestjs/common'
+import {
+  Get,
+  Post,
+  Put,
+  Body,
+  Param,
+  Controller,
+  HttpException
+} from '@nestjs/common'
 import { ApiBearerAuth } from '@nestjs/swagger'
 
-import { CreateUserDto, LoginUserDto, ValidateJwtDto } from './dto'
+import {
+  CreateUserDto,
+  LoginUserDto,
+  ValidateJwtDto,
+  UpdateUserDto
+} from './dto'
 import { UserService } from './user.service'
 import { UserRO } from './user.interface'
 import { User } from './user.decorator'
@@ -45,5 +58,13 @@ export class UserController {
   ): Promise<Record<string, boolean>> {
     const { jwt } = jwtDto
     return this.userService.validateJWT(jwt)
+  }
+
+  @Put('users/:id')
+  async updateProfile(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto
+  ): Promise<UserRO> {
+    return this.userService.updateUser(id, updateUserDto)
   }
 }

@@ -8,7 +8,7 @@ import { validate } from 'class-validator'
 
 import { SECRET } from '../config'
 import { User } from './user.entity'
-import { CreateUserDto, LoginUserDto } from './dto'
+import { CreateUserDto, LoginUserDto, UpdateUserDto } from './dto'
 import { UserRO } from './user.interface'
 
 @Injectable()
@@ -107,6 +107,14 @@ export class UserService {
     } catch (err) {
       throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED)
     }
+  }
+
+  async updateUser(id: string, dto: UpdateUserDto): Promise<UserRO> {
+    await this.userRepository.update({ id }, dto)
+
+    const user = await this.userRepository.findOne(id)
+
+    return this.buildUserRO(user)
   }
 
   public generateJWT(user) {
