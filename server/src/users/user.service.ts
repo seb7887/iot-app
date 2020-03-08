@@ -2,7 +2,7 @@ import { Injectable, HttpStatus } from '@nestjs/common'
 import { HttpException } from '@nestjs/common/exceptions/http.exception'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, getRepository } from 'typeorm'
-import { sign } from 'jsonwebtoken'
+import { sign, verify, decode } from 'jsonwebtoken'
 import * as bcrypt from 'bcrypt'
 import { validate } from 'class-validator'
 
@@ -91,6 +91,22 @@ export class UserService {
   async findByEmail(email: string): Promise<UserRO> {
     const user = await this.userRepository.findOne({ email })
     return this.buildUserRO(user)
+  }
+
+  async validateJWT(jwt: string) {
+    try {
+      verify(jwt, SECRET)
+
+      const decoded = decode(jwt) as any
+      const expiry = decoded.exp
+      const now = new Date()
+
+      return now.getTime() < expiry * 1000
+        ? { isValid: true }
+        : { isValid: false }
+    } catch (err) {
+      throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED)
+    }
   }
 
   public generateJWT(user) {

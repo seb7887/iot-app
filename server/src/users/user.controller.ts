@@ -1,7 +1,7 @@
 import { Get, Post, Body, Controller, HttpException } from '@nestjs/common'
 import { ApiBearerAuth } from '@nestjs/swagger'
 
-import { CreateUserDto, LoginUserDto } from './dto'
+import { CreateUserDto, LoginUserDto, ValidateJwtDto } from './dto'
 import { UserService } from './user.service'
 import { UserRO } from './user.interface'
 import { User } from './user.decorator'
@@ -11,7 +11,7 @@ import { User } from './user.decorator'
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('user')
+  @Get('users')
   async findMe(@User('email') email: string): Promise<UserRO> {
     return this.userService.findByEmail(email)
   }
@@ -37,5 +37,13 @@ export class UserController {
     return {
       user
     }
+  }
+
+  @Post('users/validate-jwt')
+  async validateJwt(
+    @Body() jwtDto: ValidateJwtDto
+  ): Promise<Record<string, boolean>> {
+    const { jwt } = jwtDto
+    return this.userService.validateJWT(jwt)
   }
 }

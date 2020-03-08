@@ -137,6 +137,19 @@ describe('App', () => {
         })
       })
     })
+
+    describe('POST users/validate-jwt', () => {
+      it('returns 200', async () => {
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .post('/users/validate-jwt')
+          .send({ jwt: token })
+          .expect(201)
+
+        expect(body).toBeDefined()
+        expect(body.isValid).toBeTruthy()
+      })
+    })
   })
 
   describe('Groups', () => {
