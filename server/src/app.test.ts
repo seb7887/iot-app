@@ -41,8 +41,8 @@ describe('App', () => {
           host: 'localhost',
           port: 5432,
           username: 'postgres',
-          password: 'docker',
-          database: 'iot-app',
+          password: '',
+          database: 'postgres',
           entities: ['./**/*.entity.ts'],
           synchronize: false
         })

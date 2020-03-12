@@ -29,7 +29,7 @@ export class Device {
   @Column()
   connected: boolean
 
-  @Column()
+  @Column('jsonb')
   properties: Record<string, any>
 
   @CreateDateColumn()

@@ -5,12 +5,13 @@ import { UserModule } from './users/user.module'
 // Groups module
 import { GroupModule } from './groups/group.module'
 // Devices module
+import { DeviceModule } from './devices/device.module'
 // Logs module
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Connection } from 'typeorm'
 
 @Module({
-  imports: [TypeOrmModule.forRoot(), UserModule, GroupModule],
+  imports: [TypeOrmModule.forRoot(), UserModule, GroupModule, DeviceModule],
   controllers: [AppController],
   providers: []
 })

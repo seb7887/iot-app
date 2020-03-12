@@ -2,7 +2,7 @@ export interface DeviceData {
   id: string
   groupId: string | null
   serial: string
-  secret: string
+  secret?: string
   connected: boolean
   properties: Record<string, any>
 }

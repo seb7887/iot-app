@@ -5,9 +5,10 @@ import { Repository, getRepository } from 'typeorm'
 import { validate } from 'class-validator'
 import { DateTime } from 'luxon'
 
+import { Group } from '../groups/group.entity'
 import { Device } from './device.entity'
-import { CreateDeviceDto } from './dto'
-import { DeviceData, DeviceRO } from './device.interface'
+import { CreateDeviceDto, ListDevicesDto } from './dto'
+import { DeviceData, DeviceRO, DeviceListRO } from './device.interface'
 
 @Injectable()
 export class DeviceService {
@@ -15,6 +16,25 @@ export class DeviceService {
     @InjectRepository(Device)
     private readonly deviceRepository: Repository<Device>
   ) {}
+
+  async getHierarchy(id: string): Promise<string[]> {
+    const hierarchy = await getRepository(Group).query(
+      `WITH RECURSIVE hierarchy(id, parent_id) AS (
+        SELECT id, parent_id FROM groups WHERE id = $1
+        UNION ALL
+        SELECT g.id, g.parent_id FROM groups g INNER JOIN hierarchy h ON g.parent_id = h.id
+      ) SELECT id from hierarchy`,
+      [id]
+    )
+
+    return hierarchy.map(h => h.id)
+  }
+
+  async hasPermissions(userGroupId: string, groupId: string): Promise<boolean> {
+    const ids = await this.getHierarchy(userGroupId)
+
+    return ids.includes(groupId)
+  }
 
   async findById(id: string): Promise<DeviceRO> {
     const device = await this.deviceRepository.findOne(id)
@@ -27,10 +47,42 @@ export class DeviceService {
     return this.buildDeviceRO(device)
   }
 
+  async findByProps(props: Record<string, number | string>) {
+    console.log(JSON.stringify(props))
+    const [device] = await getRepository(Device).query(
+      `
+      SELECT * FROM devices WHERE properties @> '${JSON.stringify(props)}'
+    ` //[JSON.stringify(props)]
+    )
+    console.log('device', device)
+
+    return this.buildDeviceRO(device)
+  }
+
+  async listDevices(dto: ListDevicesDto): Promise<DeviceListRO> {
+    const { role, groupId, sortBy, sortOrder, pageSize, page } = dto
+    const isAdmin = role === 'admin'
+
+    const subgroups =
+      groupId && !isAdmin ? await this.getHierarchy(groupId) : null
+
+    const [devices, count] = await getRepository(Device)
+      .createQueryBuilder('devices')
+      .where(subgroups ? 'devices.group_id IN (:...subgroups)' : '1=1', {
+        subgroups
+      })
+      .orderBy(sortBy)
+      .limit(pageSize)
+      .offset(Number(page) - 1)
+      .getManyAndCount()
+
+    return this.buildDeviceListRO(devices, count, page, pageSize, sortOrder)
+  }
+
   async create(dto: CreateDeviceDto): Promise<DeviceRO> {
     const { serial, groupId } = dto
 
-    const qb = await getRepository(Device)
+    const qb = getRepository(Device)
       .createQueryBuilder('devices')
       .where('devices.serial = :serial', { serial })
 
@@ -77,6 +129,32 @@ export class DeviceService {
 
     return {
       device: deviceRO
+    }
+  }
+
+  private buildDeviceListRO(
+    devices: Device[],
+    count: number,
+    page: number,
+    pageSize: number,
+    sortOrder: string
+  ) {
+    const devicesRO: DeviceData[] = devices.map(device => ({
+      id: device.id,
+      groupId: device.groupId,
+      serial: device.serial,
+      connected: device.connected,
+      properties: device.properties
+    }))
+
+    return {
+      devices: devicesRO,
+      meta: {
+        count,
+        page,
+        pageSize,
+        sortOrder
+      }
     }
   }
 }
