@@ -1,12 +1,15 @@
 import { IsNotEmpty, IsUUID } from 'class-validator'
 
-export class ListDevicesDto {
+export class SearchDevicesDto {
+  @IsNotEmpty()
+  readonly props: Record<string, string | number>
+
   @IsNotEmpty()
   readonly role: string
 
   @IsNotEmpty()
   @IsUUID()
-  readonly groupId: string | null
+  readonly groupId: string
 
   @IsNotEmpty()
   readonly sortBy: string

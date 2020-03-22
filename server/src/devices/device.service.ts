@@ -7,7 +7,7 @@ import { DateTime } from 'luxon'
 
 import { Group } from '../groups/group.entity'
 import { Device } from './device.entity'
-import { CreateDeviceDto, ListDevicesDto } from './dto'
+import { CreateDeviceDto, ListDevicesDto, SearchDevicesDto } from './dto'
 import { DeviceData, DeviceRO, DeviceListRO } from './device.interface'
 
 @Injectable()
@@ -47,16 +47,25 @@ export class DeviceService {
     return this.buildDeviceRO(device)
   }
 
-  async findByProps(props: Record<string, number | string>) {
-    console.log(JSON.stringify(props))
-    const [device] = await getRepository(Device).query(
-      `
-      SELECT * FROM devices WHERE properties @> '${JSON.stringify(props)}'
-    ` //[JSON.stringify(props)]
-    )
-    console.log('device', device)
+  async findByProps(dto: SearchDevicesDto): Promise<DeviceListRO> {
+    const { props, groupId, role, page, pageSize, sortBy, sortOrder } = dto
+    const isAdmin = role === 'admin'
 
-    return this.buildDeviceRO(device)
+    const subgroups =
+      groupId && !isAdmin ? await this.getHierarchy(groupId) : null
+
+    const [devices, count] = await getRepository(Device)
+      .createQueryBuilder('devices')
+      .where(subgroups ? 'devices.group_id IN (:...subgroups)' : '1=1', {
+        subgroups
+      })
+      .andWhere('devices.properties @> :props', { props })
+      .orderBy(sortBy, sortOrder)
+      .limit(pageSize)
+      .offset(Number(page) - 1)
+      .getManyAndCount()
+
+    return this.buildDeviceListRO(devices, count, page, pageSize, sortOrder)
   }
 
   async listDevices(dto: ListDevicesDto): Promise<DeviceListRO> {
@@ -71,7 +80,7 @@ export class DeviceService {
       .where(subgroups ? 'devices.group_id IN (:...subgroups)' : '1=1', {
         subgroups
       })
-      .orderBy(sortBy)
+      .orderBy(sortBy, sortOrder)
       .limit(pageSize)
       .offset(Number(page) - 1)
       .getManyAndCount()
@@ -115,6 +124,72 @@ export class DeviceService {
       await this.deviceRepository.save(newDevice)
       return this.buildDeviceRO(newDevice)
     }
+  }
+
+  async updateDeviceGroup(
+    role: string,
+    id: string,
+    groupId: string
+  ): Promise<DeviceRO> {
+    if (role !== 'admin') {
+      const errors = { role: 'User must be admin' }
+      throw new HttpException({ errors }, HttpStatus.UNAUTHORIZED)
+    }
+
+    const qb = getRepository(Device)
+      .createQueryBuilder('devices')
+      .where('devices.id = :id', { id })
+
+    const device = await qb.getOne()
+
+    if (!device) {
+      const errors = { Device: 'Not found' }
+      throw new HttpException({ errors }, HttpStatus.NOT_FOUND)
+    }
+
+    const updateResult = await getRepository(Device)
+      .createQueryBuilder()
+      .update(Device)
+      .set({ groupId })
+      .where('id = :id', { id })
+      .execute()
+
+    if (updateResult.affected > 0) {
+      const updatedDevice = await qb.getOne()
+      return this.buildDeviceRO(updatedDevice)
+    } else {
+      const errors = { operations: 'Cannot update device group' }
+      throw new HttpException({ errors }, HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  async deleteDevice(
+    role: string,
+    id: string
+  ): Promise<Record<string, boolean>> {
+    if (role !== 'admin') {
+      const errors = { role: 'User must be admin' }
+      throw new HttpException({ errors }, HttpStatus.UNAUTHORIZED)
+    }
+
+    const qb = getRepository(Device)
+      .createQueryBuilder('devices')
+      .where('devices.id = :id', { id })
+
+    const device = await qb.getOne()
+
+    if (!device) {
+      const errors = { Device: 'Not found' }
+      throw new HttpException({ errors }, HttpStatus.NOT_FOUND)
+    }
+
+    const deleteResult = await getRepository(Device)
+      .createQueryBuilder('devices')
+      .delete()
+      .where('devices.id = :id', { id })
+      .execute()
+
+    return deleteResult.affected > 0 ? { success: true } : { success: false }
   }
 
   private buildDeviceRO(device: Device) {

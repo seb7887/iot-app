@@ -56,7 +56,7 @@ export class GroupService {
       .where(subgroups ? 'groups.id IN (:...subgroups)' : '1=1', { subgroups })
       .andWhere(parentId ? `groups.parent_id = :parentId` : `1=1`, { parentId })
       .andWhere(name ? `groups.name LIKE '%${name}%'` : '1=1')
-      .orderBy(sortBy)
+      .orderBy(sortBy, sortOrder)
       .limit(pageSize)
       .offset(Number(page) - 1)
       .getManyAndCount()

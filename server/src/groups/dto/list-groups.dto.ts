@@ -16,7 +16,7 @@ export class ListGroupsDto {
   readonly sortBy: string
 
   @IsNotEmpty()
-  readonly sortOrder: string
+  readonly sortOrder: 'ASC' | 'DESC'
 
   @IsNotEmpty()
   readonly pageSize: number

@@ -1,4 +1,13 @@
-import { Get, Post, Body, Query, Controller, Param } from '@nestjs/common'
+import {
+  Get,
+  Post,
+  Put,
+  Body,
+  Query,
+  Controller,
+  Param,
+  Delete
+} from '@nestjs/common'
 import { ApiBearerAuth } from '@nestjs/swagger'
 
 import { CreateDeviceDto } from './dto'
@@ -41,8 +50,38 @@ export class DeviceController {
 
   @Post('devices/search')
   async findByProp(
+    @User('role') role: string,
+    @User('groupId') groupId: string,
+    @Query() query,
     @Body() props: Record<string, number | string>
+  ): Promise<DeviceListRO> {
+    const { sortBy, sortOrder, page, pageSize } = query
+
+    return this.deviceService.findByProps({
+      role,
+      groupId,
+      sortBy,
+      sortOrder,
+      page,
+      pageSize,
+      props
+    })
+  }
+
+  @Delete('devices/:id')
+  async deleteDevice(
+    @User('role') role: string,
+    @Body() id: string
+  ): Promise<Record<string, boolean>> {
+    return this.deviceService.deleteDevice(role, id)
+  }
+
+  @Put('devices/:id')
+  async updateGroup(
+    @Param('id') id: string,
+    @User('role') role: string,
+    @Body() groupId: string
   ): Promise<DeviceRO> {
-    return this.deviceService.findByProps(props)
+    return this.deviceService.updateDeviceGroup(role, id, groupId)
   }
 }
