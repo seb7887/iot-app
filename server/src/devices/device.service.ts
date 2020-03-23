@@ -30,12 +30,6 @@ export class DeviceService {
     return hierarchy.map(h => h.id)
   }
 
-  async hasPermissions(userGroupId: string, groupId: string): Promise<boolean> {
-    const ids = await this.getHierarchy(userGroupId)
-
-    return ids.includes(groupId)
-  }
-
   async findById(id: string): Promise<DeviceRO> {
     const device = await this.deviceRepository.findOne(id)
 
@@ -147,26 +141,14 @@ export class DeviceService {
       throw new HttpException({ errors }, HttpStatus.NOT_FOUND)
     }
 
-    const updateResult = await getRepository(Device)
-      .createQueryBuilder()
-      .update(Device)
-      .set({ groupId })
-      .where('id = :id', { id })
-      .execute()
+    device.groupId = groupId
 
-    if (updateResult.affected > 0) {
-      const updatedDevice = await qb.getOne()
-      return this.buildDeviceRO(updatedDevice)
-    } else {
-      const errors = { operations: 'Cannot update device group' }
-      throw new HttpException({ errors }, HttpStatus.BAD_REQUEST)
-    }
+    const updatedDevice = await this.deviceRepository.save(device)
+
+    return this.buildDeviceRO(updatedDevice)
   }
 
-  async deleteDevice(
-    role: string,
-    id: string
-  ): Promise<Record<string, boolean>> {
+  async deleteDevice(role: string, id: string): Promise<DeviceRO> {
     if (role !== 'admin') {
       const errors = { role: 'User must be admin' }
       throw new HttpException({ errors }, HttpStatus.UNAUTHORIZED)
@@ -183,13 +165,23 @@ export class DeviceService {
       throw new HttpException({ errors }, HttpStatus.NOT_FOUND)
     }
 
-    const deleteResult = await getRepository(Device)
-      .createQueryBuilder('devices')
-      .delete()
-      .where('devices.id = :id', { id })
-      .execute()
+    const deletedDevice = await this.deviceRepository.remove(device)
 
-    return deleteResult.affected > 0 ? { success: true } : { success: false }
+    return this.buildDeviceRO(deletedDevice)
+  }
+
+  async authDevice(
+    serial: string,
+    secret: string
+  ): Promise<Record<string, boolean>> {
+    const qb = getRepository(Device)
+      .createQueryBuilder('devices')
+      .where('devices.serial = :serial', { serial })
+      .andWhere('devices.password = :secret', { secret })
+
+    const authenticated = await qb.getOne()
+
+    return authenticated ? { authenticated: true } : { authenticated: false }
   }
 
   private buildDeviceRO(device: Device) {

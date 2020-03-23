@@ -21,23 +21,19 @@ import { DeviceService } from './device.service'
 })
 export class DeviceModule implements NestModule {
   public configure(consumer: MiddlewareConsumer) {
-    // consumer.apply(AuthMiddleware).forRoutes(
-    //   {
-    //     path: 'devices',
-    //     method: RequestMethod.GET
-    //   },
-    //   {
-    //     path: 'devices',
-    //     method: RequestMethod.POST
-    //   },
-    //   {
-    //     path: 'devices',
-    //     method: RequestMethod.PUT
-    //   },
-    //   {
-    //     path: 'devices',
-    //     method: RequestMethod.DELETE
-    //   }
-    // )
+    consumer.apply(AuthMiddleware).forRoutes(
+      {
+        path: 'devices',
+        method: RequestMethod.GET
+      },
+      {
+        path: 'devices/:id',
+        method: RequestMethod.ALL
+      },
+      {
+        path: 'devices',
+        method: RequestMethod.POST
+      }
+    )
   }
 }

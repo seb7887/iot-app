@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common'
 import { ApiBearerAuth } from '@nestjs/swagger'
 
-import { CreateDeviceDto } from './dto'
+import { CreateDeviceDto, AuthDeviceDto } from './dto'
 import { DeviceService } from './device.service'
 import { DeviceRO, DeviceListRO } from './device.interface'
 import { User } from '../users/user.decorator'
@@ -68,20 +68,29 @@ export class DeviceController {
     })
   }
 
-  @Delete('devices/:id')
-  async deleteDevice(
-    @User('role') role: string,
-    @Body() id: string
+  @Post('devices/auth')
+  async authDevice(
+    @Body() authData: AuthDeviceDto
   ): Promise<Record<string, boolean>> {
-    return this.deviceService.deleteDevice(role, id)
+    const { serial, secret } = authData
+
+    return this.deviceService.authDevice(serial, secret)
   }
 
   @Put('devices/:id')
   async updateGroup(
     @Param('id') id: string,
     @User('role') role: string,
-    @Body() groupId: string
+    @Body('groupId') groupId: string
   ): Promise<DeviceRO> {
     return this.deviceService.updateDeviceGroup(role, id, groupId)
+  }
+
+  @Delete('devices/:id')
+  async deleteDevice(
+    @User('role') role: string,
+    @Param('id') id: string
+  ): Promise<DeviceRO> {
+    return this.deviceService.deleteDevice(role, id)
   }
 }

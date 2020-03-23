@@ -9,6 +9,8 @@ import { User } from './users/user.entity'
 import { UserModule } from './users/user.module'
 import { Group } from './groups/group.entity'
 import { GroupModule } from './groups/group.module'
+import { Device } from './devices/device.entity'
+import { DeviceModule } from './devices/device.module'
 
 const userLogin = async (
   credentials: Record<string, string>,
@@ -27,15 +29,20 @@ describe('App', () => {
   let app: INestApplication
   let usersRepository: Repository<User>
   let groupsRepository: Repository<Group>
+  let deviceRepository: Repository<Device>
   let groupsIds: string[]
   let token: string
   let id: string
+  let sampleDevices: Record<string, any>[]
+  let deviceSerial: string
+  let deviceSecret: string
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
       imports: [
         UserModule,
         GroupModule,
+        DeviceModule,
         TypeOrmModule.forRoot({
           type: 'postgres',
           host: 'localhost',
@@ -52,29 +59,59 @@ describe('App', () => {
     app = module.createNestApplication()
     groupsRepository = module.get('GroupRepository')
     usersRepository = module.get('UserRepository')
+    deviceRepository = module.get('DeviceRepository')
 
     // Groups data
-    const parentGroup = await groupsRepository.query(
-      `INSERT INTO groups (name) VALUES ('parent') RETURNING *`
-    )
-    const subgroupsLevel1 = await groupsRepository.query(
-      `INSERT INTO groups (name, parent_id) 
+    try {
+      const parentGroup = await groupsRepository.query(
+        `INSERT INTO groups (name) VALUES ('parent') RETURNING *`
+      )
+      const subgroupsLevel1 = await groupsRepository.query(
+        `INSERT INTO groups (name, parent_id) 
     VALUES ('child_1', $1), ('child_2', $1)
     RETURNING *`,
-      [parentGroup.id]
-    )
-    groupsIds = subgroupsLevel1.map(subgroup => subgroup.id)
-    await groupsRepository.query(
-      `INSERT INTO groups (name, parent_id) VALUES ('sub_1', $1), ('sub_2', $1)`,
-      [groupsIds[0]]
-    )
+        [parentGroup.id]
+      )
+      groupsIds = subgroupsLevel1.map(subgroup => subgroup.id)
+      await groupsRepository.query(
+        `INSERT INTO groups (name, parent_id) VALUES ('sub_1', $1), ('sub_2', $1)`,
+        [groupsIds[0]]
+      )
+    } catch (err) {
+      console.log(err)
+    }
 
     // Users data
-    const hash = bcrypt.hashSync('test', 10)
-    await usersRepository.query(
-      `INSERT INTO users (username, email, password, role, group_id) VALUES ('admin', 'admin@admin.com', $1, 'admin', null), ('user', 'user@user.com', $1, 'user', $2)`,
-      [hash, groupsIds[0]]
-    )
+    try {
+      const hash = bcrypt.hashSync('test', 10)
+      await usersRepository.query(
+        `INSERT INTO users (username, email, password, role, group_id) VALUES ('admin', 'admin@admin.com', $1, 'admin', null), ('user', 'user@user.com', $1, 'user', $2)`,
+        [hash, groupsIds[0]]
+      )
+    } catch (err) {
+      console.log(err)
+    }
+
+    // Device data
+    try {
+      sampleDevices = await deviceRepository.query(
+        `
+      INSERT INTO devices (group_id, serial, password, properties) VALUES 
+        ($1, '3d605a75-f8b3-48da-b51c-6738bee4e050', 'test', $3),
+        ($1, '3d605a75-f8b3-48da-b51c-6738bee4e051', 'test', $4), 
+        ($1, '3d605a75-f8b3-48da-b51c-6738bee4e052', 'test', '{}'), 
+        ($2, '3d605a75-f8b3-48da-b51c-6738bee4e053', 'test', '{}') RETURNING *
+    `,
+        [
+          groupsIds[0],
+          groupsIds[1],
+          { sampleProp: 1234 },
+          { anotherProp: 'test' }
+        ]
+      )
+    } catch (err) {
+      console.log(err)
+    }
 
     await app.init()
   })
@@ -82,6 +119,7 @@ describe('App', () => {
   afterAll(async () => {
     await groupsRepository.query(`DELETE FROM groups;`)
     await usersRepository.query(`DELETE FROM users;`)
+    await deviceRepository.query(`DELETE FROM devices;`)
     await app.close()
   })
 
@@ -250,6 +288,168 @@ describe('App', () => {
 
         expect(body.groups).toBeDefined()
         expect(body.groups).toHaveLength(3)
+      })
+    })
+  })
+
+  describe('Devices', () => {
+    describe('GET /devices', () => {
+      it('should list only group devices if user is not admin', async () => {
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .get('/devices?sortBy=id&pageSize=8&page=1')
+          .set('Authorization', `Bearer ${token}`)
+          .expect(200)
+
+        expect(body.devices).toBeDefined()
+        expect(body.devices).toHaveLength(3)
+        expect(body.meta).toBeDefined()
+        expect(body.meta.count).toEqual(3)
+      })
+
+      it('should list all devices if user is admin', async () => {
+        token = await userLogin(
+          {
+            email: 'admin@admin.com',
+            password: 'test'
+          },
+          app
+        )
+
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .get('/devices?sortBy=id&pageSize=8&page=1')
+          .set('Authorization', `Bearer ${token}`)
+          .expect(200)
+
+        expect(body.devices).toBeDefined()
+        expect(body.devices).toHaveLength(4)
+        expect(body.meta).toBeDefined()
+        expect(body.meta.count).toEqual(4)
+      })
+    })
+
+    describe('GET /devices/:id', () => {
+      it('should get a single device', async () => {
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .get(`/devices/${sampleDevices[0].id}`)
+          .set('Authorization', `Bearer ${token}`)
+          .expect(200)
+
+        expect(body.device).toBeDefined()
+        expect(body.device).toMatchObject({
+          id: sampleDevices[0].id,
+          groupId: sampleDevices[0].group_id,
+          serial: sampleDevices[0].serial,
+          secret: expect.any(String),
+          properties: sampleDevices[0].properties
+        })
+      })
+    })
+
+    describe('POST /devices/search', () => {
+      it('should get all devices with given properties', async () => {
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .post('/devices/search?pageSize=8&page=1')
+          .send({
+            anotherProp: 'test'
+          })
+          .set('Authorization', `Bearer ${token}`)
+          .expect(201)
+
+        expect(body.devices).toBeDefined()
+        expect(body.devices).toHaveLength(1)
+        expect(body.devices[0]).toMatchObject({
+          id: sampleDevices[1].id,
+          groupId: sampleDevices[1].group_id,
+          serial: sampleDevices[1].serial,
+          properties: sampleDevices[1].properties
+        })
+        expect(body.meta).toBeDefined()
+        expect(body.meta.count).toEqual(1)
+      })
+    })
+
+    describe('POST /devices', () => {
+      it('should create a new device', async () => {
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .post('/devices')
+          .send({
+            serial: '3d605a75-f8b3-48da-b51c-6738bee4e054',
+            groupId: groupsIds[0]
+          })
+          .set('Authorization', `Bearer ${token}`)
+          .expect(201)
+        deviceSerial = body.device.serial
+        deviceSecret = body.device.secret
+
+        expect(body.device).toBeDefined()
+        expect(body.device).toMatchObject({
+          id: expect.any(String),
+          groupId: groupsIds[0],
+          serial: deviceSerial,
+          secret: expect.any(String),
+          properties: {}
+        })
+      })
+    })
+
+    describe('POST /devices/auth', () => {
+      it('should authenticate a device', async () => {
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .post('/devices/auth')
+          .send({
+            serial: deviceSerial,
+            secret: deviceSecret
+          })
+          .set('Authorization', `Bearer ${token}`)
+          .expect(201)
+
+        expect(body.authenticated).toBeDefined()
+        expect(body.authenticated).toBeTruthy()
+      })
+    })
+
+    describe('PUT /devices/:id', () => {
+      it('should update a device group', async () => {
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .put(`/devices/${sampleDevices[0].id}`)
+          .send({ groupId: groupsIds[1] })
+          .set('Authorization', `Bearer ${token}`)
+          .expect(200)
+
+        expect(body.device).toBeDefined()
+        expect(body.device).toMatchObject({
+          id: sampleDevices[0].id,
+          groupId: groupsIds[1],
+          serial: sampleDevices[0].serial,
+          secret: expect.any(String),
+          properties: sampleDevices[0].properties
+        })
+      })
+    })
+
+    describe('DELETE /devices/:id', () => {
+      it('should delete a device', async () => {
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .delete(`/devices/${sampleDevices[0].id}`)
+          .set('Authorization', `Bearer ${token}`)
+          .expect(200)
+
+        expect(body.device).toBeDefined()
+        expect(body.device).toMatchObject({
+          groupId: groupsIds[1],
+          serial: sampleDevices[0].serial,
+          secret: expect.any(String),
+          connected: false,
+          properties: sampleDevices[0].properties
+        })
       })
     })
   })
