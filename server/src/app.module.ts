@@ -7,11 +7,19 @@ import { GroupModule } from './groups/group.module'
 // Devices module
 import { DeviceModule } from './devices/device.module'
 // Logs module
+import { LogsModule } from './logs/logs.module'
+// Timeseries module
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Connection } from 'typeorm'
 
 @Module({
-  imports: [TypeOrmModule.forRoot(), UserModule, GroupModule, DeviceModule],
+  imports: [
+    TypeOrmModule.forRoot(),
+    UserModule,
+    GroupModule,
+    DeviceModule,
+    LogsModule
+  ],
   controllers: [AppController],
   providers: []
 })
