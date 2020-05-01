@@ -7,5 +7,5 @@
 - [x] Users
 - [x] Devices
 - [x] Logs
-- [ ] Timeseries
+- [x] Timeseries
 - [ ] Redis Cache

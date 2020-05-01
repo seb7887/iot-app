@@ -76,7 +76,8 @@ export class LogsService {
     const logsRO: LogData[] = logs.map(log => ({
       id: log.id,
       deviceId: log.deviceId,
-      connected: log.connected
+      connected: log.connected,
+      createdAt: log.createdAt
     }))
 
     return {

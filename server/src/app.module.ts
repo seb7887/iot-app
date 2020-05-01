@@ -9,6 +9,7 @@ import { DeviceModule } from './devices/device.module'
 // Logs module
 import { LogsModule } from './logs/logs.module'
 // Timeseries module
+import { TimeseriesModule } from './timeseries/timeseries.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Connection } from 'typeorm'
 
@@ -18,7 +19,8 @@ import { Connection } from 'typeorm'
     UserModule,
     GroupModule,
     DeviceModule,
-    LogsModule
+    LogsModule,
+    TimeseriesModule
   ],
   controllers: [AppController],
   providers: []

@@ -19,7 +19,7 @@ export class LogsController {
   async listLogs(@Query() query): Promise<LogsListRO> {
     const { deviceId, connected, sortBy, sortOrder, page, pageSize } = query
 
-    return this.listLogs({
+    return this.logsService.listLogs({
       deviceId,
       connected,
       sortBy,

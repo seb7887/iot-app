@@ -13,6 +13,8 @@ import { Device } from './devices/device.entity'
 import { DeviceModule } from './devices/device.module'
 import { Logs } from './logs/logs.entity'
 import { LogsModule } from './logs/logs.module'
+import { Timeseries } from './timeseries/timeseries.entity'
+import { TimeseriesModule } from './timeseries/timeseries.module'
 
 const userLogin = async (
   credentials: Record<string, string>,
@@ -33,6 +35,7 @@ describe('App', () => {
   let groupsRepository: Repository<Group>
   let deviceRepository: Repository<Device>
   let logsRepository: Repository<Logs>
+  let tsRepository: Repository<Timeseries>
   let groupsIds: string[]
   let token: string
   let id: string
@@ -48,6 +51,7 @@ describe('App', () => {
         GroupModule,
         DeviceModule,
         LogsModule,
+        TimeseriesModule,
         TypeOrmModule.forRoot({
           type: 'postgres',
           host: 'localhost',
@@ -66,6 +70,7 @@ describe('App', () => {
     usersRepository = module.get('UserRepository')
     deviceRepository = module.get('DeviceRepository')
     logsRepository = module.get('LogsRepository')
+    tsRepository = module.get('TimeseriesRepository')
 
     // Groups data
     try {
@@ -138,6 +143,7 @@ describe('App', () => {
     await usersRepository.query(`DELETE FROM users;`)
     await deviceRepository.query(`DELETE FROM devices;`)
     await logsRepository.query(`DELETE FROM logs;`)
+    await tsRepository.query(`DELETE FROM timeseries;`)
     await app.close()
   })
 
@@ -487,6 +493,33 @@ describe('App', () => {
           id: expect.any(String),
           deviceId: sampleDevices[1].id,
           connected: true
+        })
+      })
+    })
+  })
+
+  describe('Timeseries', () => {
+    describe('POST /timeseries', () => {
+      it('should create a new timeseries entry', async () => {
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .post('/timeseries')
+          .send({
+            deviceId: sampleDevices[1].id,
+            category: 'test',
+            numericValue: 8
+          })
+          .set('Authorization', `Bearer ${token}`)
+          .expect(201)
+
+        expect(body.timeseries).toBeDefined()
+        expect(body.timeseries).toMatchObject({
+          id: expect.any(String),
+          deviceId: sampleDevices[1].id,
+          category: 'test',
+          numericValue: 8,
+          stringValue: null,
+          time: expect.any(String)
         })
       })
     })

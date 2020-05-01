@@ -2,6 +2,7 @@ export interface LogData {
   id: string
   deviceId: string
   connected: boolean
+  createdAt?: Date
 }
 
 export interface LogRO {
