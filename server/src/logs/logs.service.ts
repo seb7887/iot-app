@@ -48,7 +48,7 @@ export class LogsService {
       })
       .orderBy(sortBy, sortOrder)
       .limit(pageSize)
-      .offset(Number(page) - 1)
+      .offset((Number(page) - 1) * Number(pageSize))
       .getManyAndCount()
 
     return this.buildLogListRO(logs, count, page, pageSize, sortOrder)

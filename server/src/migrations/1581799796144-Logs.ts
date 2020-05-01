@@ -6,7 +6,7 @@ export class Logs1581799796144 implements MigrationInterface {
         CREATE TABLE "logs"
         (
             "id" UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
-            "device_id" UUID NOT NULL REFERENCES "devices"("id"),
+            "device_id" UUID NOT NULL REFERENCES "devices"("id") ON DELETE CASCADE,
             "connected" BOOL NOT NULL DEFAULT false,
             "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP 
         )

@@ -4,6 +4,7 @@ import {
   Put,
   Body,
   Param,
+  Query,
   Controller,
   HttpException
 } from '@nestjs/common'
@@ -16,7 +17,7 @@ import {
   UpdateUserDto
 } from './dto'
 import { UserService } from './user.service'
-import { UserRO } from './user.interface'
+import { UserRO, UsersListRO } from './user.interface'
 import { User } from './user.decorator'
 
 @ApiBearerAuth()
@@ -25,8 +26,27 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('users')
-  async findMe(@User('email') email: string): Promise<UserRO> {
-    return this.userService.findByEmail(email)
+  async findAll(
+    @User('groupId') groupId: string,
+    @Query() query
+  ): Promise<UsersListRO> {
+    const { username, role, email, sortBy, sortOrder, page, pageSize } = query
+
+    return this.userService.listUsers({
+      role,
+      username,
+      email,
+      groupId,
+      sortBy,
+      sortOrder,
+      page,
+      pageSize
+    })
+  }
+
+  @Get('users/:id')
+  async findById(@Param('id') id: string): Promise<UserRO> {
+    return this.userService.findById(id)
   }
 
   @Post('users')

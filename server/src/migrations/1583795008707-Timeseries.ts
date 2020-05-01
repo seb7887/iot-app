@@ -6,7 +6,7 @@ export class Timeseries1583795008707 implements MigrationInterface {
         CREATE TABLE "timeseries"
         (
             "id" UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
-            "device_id" UUID NOT NULL REFERENCES "devices"("id"),
+            "device_id" UUID NOT NULL REFERENCES "devices"("id") ON DELETE CASCADE,
             "category" character varying NOT NULL,
             "numeric_value" integer,
             "string_value" character varying,

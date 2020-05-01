@@ -3,6 +3,9 @@
 ## TODO
 
 - [ ] Swagger
-- [ ] Groups
+- [x] Groups
 - [x] Users
-- [ ] Devices
+- [x] Devices
+- [x] Logs
+- [ ] Timeseries
+- [ ] Redis Cache

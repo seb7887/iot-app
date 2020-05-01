@@ -56,7 +56,7 @@ export class DeviceService {
       .andWhere('devices.properties @> :props', { props })
       .orderBy(sortBy, sortOrder)
       .limit(pageSize)
-      .offset(Number(page) - 1)
+      .offset((Number(page) - 1) * Number(pageSize))
       .getManyAndCount()
 
     return this.buildDeviceListRO(devices, count, page, pageSize, sortOrder)
@@ -76,7 +76,7 @@ export class DeviceService {
       })
       .orderBy(sortBy, sortOrder)
       .limit(pageSize)
-      .offset(Number(page) - 1)
+      .offset((Number(page) - 1) * Number(pageSize))
       .getManyAndCount()
 
     return this.buildDeviceListRO(devices, count, page, pageSize, sortOrder)

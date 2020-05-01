@@ -58,7 +58,7 @@ export class GroupService {
       .andWhere(name ? `groups.name LIKE '%${name}%'` : '1=1')
       .orderBy(sortBy, sortOrder)
       .limit(pageSize)
-      .offset(Number(page) - 1)
+      .offset((Number(page) - 1) * Number(pageSize))
       .getManyAndCount()
 
     return this.buildGroupListRO(groups, count, page, pageSize, sortOrder)

@@ -11,6 +11,8 @@ import { Group } from './groups/group.entity'
 import { GroupModule } from './groups/group.module'
 import { Device } from './devices/device.entity'
 import { DeviceModule } from './devices/device.module'
+import { Logs } from './logs/logs.entity'
+import { LogsModule } from './logs/logs.module'
 
 const userLogin = async (
   credentials: Record<string, string>,
@@ -30,12 +32,14 @@ describe('App', () => {
   let usersRepository: Repository<User>
   let groupsRepository: Repository<Group>
   let deviceRepository: Repository<Device>
+  let logsRepository: Repository<Logs>
   let groupsIds: string[]
   let token: string
   let id: string
   let sampleDevices: Record<string, any>[]
   let deviceSerial: string
   let deviceSecret: string
+  let sampleLogs: Record<string, any>[]
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
@@ -43,6 +47,7 @@ describe('App', () => {
         UserModule,
         GroupModule,
         DeviceModule,
+        LogsModule,
         TypeOrmModule.forRoot({
           type: 'postgres',
           host: 'localhost',
@@ -60,6 +65,7 @@ describe('App', () => {
     groupsRepository = module.get('GroupRepository')
     usersRepository = module.get('UserRepository')
     deviceRepository = module.get('DeviceRepository')
+    logsRepository = module.get('LogsRepository')
 
     // Groups data
     try {
@@ -68,8 +74,8 @@ describe('App', () => {
       )
       const subgroupsLevel1 = await groupsRepository.query(
         `INSERT INTO groups (name, parent_id) 
-    VALUES ('child_1', $1), ('child_2', $1)
-    RETURNING *`,
+          VALUES ('child_1', $1), ('child_2', $1)
+          RETURNING *`,
         [parentGroup.id]
       )
       groupsIds = subgroupsLevel1.map(subgroup => subgroup.id)
@@ -113,6 +119,17 @@ describe('App', () => {
       console.log(err)
     }
 
+    try {
+      sampleLogs = await logsRepository.query(
+        `
+        INSERT INTO logs (device_id, connected) VALUES ($1, true), ($1, false)
+      `,
+        [sampleDevices[1].id]
+      )
+    } catch (err) {
+      console.log(err)
+    }
+
     await app.init()
   })
 
@@ -120,6 +137,7 @@ describe('App', () => {
     await groupsRepository.query(`DELETE FROM groups;`)
     await usersRepository.query(`DELETE FROM users;`)
     await deviceRepository.query(`DELETE FROM devices;`)
+    await logsRepository.query(`DELETE FROM logs;`)
     await app.close()
   })
 
@@ -449,6 +467,26 @@ describe('App', () => {
           secret: expect.any(String),
           connected: false,
           properties: sampleDevices[0].properties
+        })
+      })
+    })
+  })
+
+  describe('Logs', () => {
+    describe('POST /logs', () => {
+      it('should create a new log', async () => {
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .post('/logs')
+          .send({ deviceId: sampleDevices[1].id, connected: true })
+          .set('Authorization', `Bearer ${token}`)
+          .expect(201)
+
+        expect(body.log).toBeDefined()
+        expect(body.log).toMatchObject({
+          id: expect.any(String),
+          deviceId: sampleDevices[1].id,
+          connected: true
         })
       })
     })

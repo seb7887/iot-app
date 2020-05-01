@@ -8,8 +8,8 @@ import { validate } from 'class-validator'
 
 import { SECRET } from '../config'
 import { User } from './user.entity'
-import { CreateUserDto, LoginUserDto, UpdateUserDto } from './dto'
-import { UserRO } from './user.interface'
+import { CreateUserDto, LoginUserDto, UpdateUserDto, ListUsersDto } from './dto'
+import { UserRO, UsersListRO, UserData } from './user.interface'
 
 @Injectable()
 export class UserService {
@@ -20,6 +20,17 @@ export class UserService {
 
   async findAll(): Promise<User[]> {
     return this.userRepository.find()
+  }
+
+  async findById(id: string): Promise<UserRO> {
+    const user = await this.userRepository.findOne(id)
+
+    if (!user) {
+      const errors = { User: 'Not found' }
+      throw new HttpException({ errors }, HttpStatus.NOT_FOUND)
+    }
+
+    return this.buildUserRO(user)
   }
 
   async findOne(loginUserDto: LoginUserDto): Promise<User> {
@@ -33,6 +44,38 @@ export class UserService {
     const isValid = bcrypt.compareSync(password, user.password)
 
     return isValid ? user : null
+  }
+
+  async listUsers(dto: ListUsersDto): Promise<UsersListRO> {
+    const {
+      username,
+      role,
+      groupId,
+      email,
+      sortBy,
+      sortOrder,
+      page,
+      pageSize
+    } = dto
+
+    const [users, count] = await getRepository(User)
+      .createQueryBuilder('users')
+      .where(groupId ? 'users.group_id = :groupId' : '1 = 1', { groupId })
+      .andWhere(role ? 'users.role = :role' : '1 = 1', {
+        role
+      })
+      .andWhere(email ? 'users.email ILIKE :email' : '1:1', {
+        email: `%${email}%`
+      })
+      .andWhere(username ? 'users.username ILIKE :username' : '1:1', {
+        username: `%${username}%`
+      })
+      .orderBy(sortBy, sortOrder)
+      .limit(pageSize)
+      .offset((Number(page) - 1) * Number(pageSize))
+      .getManyAndCount()
+
+    return this.buildUsersListRO(users, count, page, pageSize, sortOrder)
   }
 
   async create(dto: CreateUserDto): Promise<UserRO> {
@@ -75,17 +118,6 @@ export class UserService {
       const savedUser = await this.userRepository.save(newUser)
       return this.buildUserRO(savedUser)
     }
-  }
-
-  async findById(id: string): Promise<UserRO> {
-    const user = await this.userRepository.findOne(id)
-
-    if (!user) {
-      const errors = { User: 'Not Found' }
-      throw new HttpException({ errors }, 401)
-    }
-
-    return this.buildUserRO(user)
   }
 
   async findByEmail(email: string): Promise<UserRO> {
@@ -147,6 +179,33 @@ export class UserService {
 
     return {
       user: userRO
+    }
+  }
+
+  private buildUsersListRO(
+    users: User[],
+    count: number,
+    page: number,
+    pageSize: number,
+    sortOrder: string
+  ) {
+    const usersRO: UserData[] = users.map(user => ({
+      id: user.id,
+      groupId: user.groupId,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      ...(user.avatar && { avatar: user.avatar })
+    }))
+
+    return {
+      users: usersRO,
+      meta: {
+        count,
+        page,
+        pageSize,
+        sortOrder
+      }
     }
   }
 }
