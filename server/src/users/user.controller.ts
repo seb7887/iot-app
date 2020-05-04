@@ -14,7 +14,8 @@ import {
   CreateUserDto,
   LoginUserDto,
   ValidateJwtDto,
-  UpdateUserDto
+  UpdateUserDto,
+  ResetTokenDto
 } from './dto'
 import { UserService } from './user.service'
 import { UserRO, UsersListRO } from './user.interface'
@@ -86,5 +87,25 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto
   ): Promise<UserRO> {
     return this.userService.updateUser(id, updateUserDto)
+  }
+
+  @Post('users/reset-token')
+  async resetPasswordToken(
+    @Body() dto: ResetTokenDto
+  ): Promise<Record<string, string>> {
+    return this.userService.generateResetToken(dto)
+  }
+
+  @Post('users/reset-password/:id')
+  async resetPassword(
+    @Param('id') id: string,
+    @Body('resetToken') resetToken: string,
+    @Body('newPassword') newPassword: string
+  ): Promise<Record<string, any>> {
+    return this.userService.resetPassword({
+      userId: id,
+      resetToken,
+      newPassword
+    })
   }
 }

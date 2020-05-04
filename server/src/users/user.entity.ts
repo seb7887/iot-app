@@ -42,6 +42,9 @@ export class User {
   @Column({ type: 'enum', enum: RoleType, default: RoleType.USER })
   role: RoleType
 
+  @Column({ nullable: true, name: 'reset_token' })
+  resetToken: string
+
   @CreateDateColumn()
   createdAt: Date
 

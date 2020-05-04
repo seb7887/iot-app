@@ -8,7 +8,14 @@ import { validate } from 'class-validator'
 
 import { SECRET } from '../config'
 import { User } from './user.entity'
-import { CreateUserDto, LoginUserDto, UpdateUserDto, ListUsersDto } from './dto'
+import {
+  CreateUserDto,
+  LoginUserDto,
+  UpdateUserDto,
+  ListUsersDto,
+  ResetTokenDto,
+  ResetPasswordDto
+} from './dto'
 import { UserRO, UsersListRO, UserData } from './user.interface'
 
 @Injectable()
@@ -149,6 +156,65 @@ export class UserService {
     return this.buildUserRO(user)
   }
 
+  async generateResetToken(dto: ResetTokenDto) {
+    const { email } = dto
+
+    const { user } = await this.findByEmail(email)
+
+    if (!user) {
+      throw new HttpException(
+        { message: 'User not found' },
+        HttpStatus.NOT_FOUND
+      )
+    }
+
+    const resetToken = sign({ id: user.id }, SECRET, { expiresIn: '1h' })
+
+    await this.userRepository.update({ id: user.id }, { resetToken })
+
+    return {
+      resetToken
+    }
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    const { userId, resetToken, newPassword } = dto
+
+    const { user } = await this.findById(userId)
+
+    if (!user) {
+      throw new HttpException(
+        { message: 'User not found' },
+        HttpStatus.NOT_FOUND
+      )
+    }
+
+    if (user.resetToken !== resetToken) {
+      throw new HttpException(
+        { message: 'Password reset token does not match' },
+        HttpStatus.BAD_REQUEST
+      )
+    }
+
+    try {
+      verify(resetToken, SECRET)
+    } catch (err) {
+      throw new HttpException(
+        { message: 'Password reset token is invalid' },
+        HttpStatus.BAD_REQUEST
+      )
+    }
+
+    await this.userRepository.update(
+      { id: userId },
+      { password: newPassword, resetToken: null }
+    )
+
+    return {
+      success: true
+    }
+  }
+
   public generateJWT(user) {
     const today = new Date()
     const exp = new Date(today)
@@ -174,7 +240,8 @@ export class UserService {
       token: this.generateJWT(user),
       groupId: user.groupId,
       role: user.role,
-      avatar: user.avatar
+      avatar: user.avatar,
+      ...(user.resetToken && { resetToken: user.resetToken })
     }
 
     return {
@@ -195,6 +262,7 @@ export class UserService {
       username: user.username,
       email: user.email,
       role: user.role,
+      ...(user.resetToken && { resetToken: user.resetToken }),
       ...(user.avatar && { avatar: user.avatar })
     }))
 

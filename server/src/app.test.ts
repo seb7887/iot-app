@@ -39,6 +39,7 @@ describe('App', () => {
   let groupsIds: string[]
   let token: string
   let id: string
+  let resetToken: string
   let sampleDevices: Record<string, any>[]
   let deviceSerial: string
   let deviceSecret: string
@@ -238,6 +239,47 @@ describe('App', () => {
           token: expect.any(String),
           role: 'admin',
           groupId: null
+        })
+      })
+    })
+
+    describe('POST users/reset-token', () => {
+      it('should generate a new password reset token', async () => {
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .post('/users/reset-token')
+          .set('Authorization', `Bearer ${token}`)
+          .send({ email: 'test@test.com' })
+          .expect(201)
+
+        expect(body).toBeDefined()
+        expect(body).toMatchObject({
+          resetToken: expect.any(String)
+        })
+        resetToken = body.resetToken
+        const user = await usersRepository.query(
+          `SELECT * FROM users WHERE email = 'test@test.com'`
+        )
+        id = user[0].id
+        expect(user[0].reset_token).toEqual(resetToken)
+      })
+    })
+
+    describe('POST users/reset-password/:id', () => {
+      it('should reset user password', async () => {
+        const { body } = await supertest
+          .agent(app.getHttpServer())
+          .post(`/users/reset-password/${id}`)
+          .set('Authorization', `Bearer ${token}`)
+          .send({
+            resetToken,
+            newPassword: 'newPassword'
+          })
+          .expect(201)
+
+        expect(body).toBeDefined()
+        expect(body).toMatchObject({
+          success: true
         })
       })
     })

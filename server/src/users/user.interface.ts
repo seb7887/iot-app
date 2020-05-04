@@ -7,6 +7,7 @@ export interface UserData {
   token?: string
   groupId: string | null
   role: RoleType
+  resetToken?: string
   avatar?: string
 }
 

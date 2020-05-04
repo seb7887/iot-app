@@ -23,6 +23,7 @@ export class Users1581267459467 implements MigrationInterface {
         "group_id" UUID REFERENCES "groups"("id") ON DELETE CASCADE,
         "avatar" character varying,
         "role" "user_role" NOT NULL DEFAULT 'user',
+        "reset_token" character varying,
         "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
