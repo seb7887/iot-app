@@ -215,7 +215,7 @@ export class UserService {
     }
   }
 
-  public generateJWT(user) {
+  public generateJWT(user: User) {
     const today = new Date()
     const exp = new Date(today)
     exp.setDate(today.getDate() + 60)
@@ -225,6 +225,7 @@ export class UserService {
         id: user.id,
         username: user.username,
         email: user.email,
+        role: user.role,
         groupId: user.groupId,
         exp: exp.getTime() / 1000
       },

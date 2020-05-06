@@ -14,11 +14,18 @@ export class AuthMiddleware implements NestMiddleware {
     const authHeaders = req.headers.authorization
     if (authHeaders && authHeaders.split(' ')[1]) {
       const token = authHeaders.split(' ')[1]
-      const decoded: any = verify(token, SECRET)
-      const user = await this.userService.findById(decoded.id)
+      let user
 
-      if (!user) {
-        throw new HttpException('User not found', HttpStatus.UNAUTHORIZED)
+      // If API KEY is provided
+      if (token !== process.env.API_KEY) {
+        const decoded: any = verify(token, SECRET)
+        user = await this.userService.findById(decoded.id)
+
+        if (!user) {
+          throw new HttpException('User not found', HttpStatus.UNAUTHORIZED)
+        }
+      } else {
+        user = await this.userService.findByEmail('admin@iot.com')
       }
 
       req.user = user.user
