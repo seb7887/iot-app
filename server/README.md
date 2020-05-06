@@ -2,7 +2,7 @@
 
 ## TODO
 
-- [ ] Swagger
+- [x] Swagger
 - [ ] Seeds
 - [x] Groups
 - [x] Users
