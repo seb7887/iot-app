@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import * as supertest from 'supertest'
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcryptjs'
 
 import { User } from './users/user.entity'
 import { UserModule } from './users/user.module'
@@ -95,7 +95,8 @@ describe('App', () => {
 
     // Users data
     try {
-      const hash = bcrypt.hashSync('test', 10)
+      const salt = bcrypt.genSaltSync(10)
+      const hash = bcrypt.hashSync('test', salt)
       await usersRepository.query(
         `INSERT INTO users (username, email, password, role, group_id) VALUES ('admin', 'admin@admin.com', $1, 'admin', null), ('user', 'user@user.com', $1, 'user', $2)`,
         [hash, groupsIds[0]]

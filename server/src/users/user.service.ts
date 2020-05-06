@@ -3,7 +3,7 @@ import { HttpException } from '@nestjs/common/exceptions/http.exception'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, getRepository } from 'typeorm'
 import { sign, verify, decode } from 'jsonwebtoken'
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcryptjs'
 import { validate } from 'class-validator'
 
 import { SECRET } from '../config'

@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
   BeforeInsert
 } from 'typeorm'
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcryptjs'
 
 @Entity({ name: 'devices' })
 export class Device {
@@ -23,7 +23,8 @@ export class Device {
   password: string
   @BeforeInsert()
   hashPassword() {
-    this.password = bcrypt.hashSync(this.password, 10)
+    const salt = bcrypt.genSaltSync(10)
+    this.password = bcrypt.hashSync(this.password, salt)
   }
 
   @Column()

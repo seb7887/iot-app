@@ -1,0 +1,47 @@
+version: "3.6"
+services:
+  postgres:
+    image: "mdillon/postgis"
+    restart: always
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: ./server
+    environment:
+      SECRET: D0Wh4tTh0uW1lt
+      API_KEY: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IiIsInVzZXJuYW1lIjoiYXBpS2V5IiwiZW1haWwiOiJhcGlAa2V5LmNvbSIsInJvbGUiOiJhZG1pbiIsImdyb3VwSWQiOm51bGwsImp0aSI6ImE2Zjg3ZDA3LTIwOTctNDc0YS04YTM1LTJiMWZjMTA4OWUwNyIsImlhdCI6MTU4ODc4NTIxMCwiZXhwIjoxNTg4Nzg4ODEwfQ.jlk5VUwdE71BuV_nO4XikGWM9Sf-wxt4iDjPWDN2-aU
+      TYPEORM_CONNECTION: postgres
+      TYPEORM_USERNAME: postgres
+      TYPEORM_PASSWORD:
+      TYPEORM_HOST: postgres
+      TYPEORM_PORT: 5432
+      TYPEORM_DATABASE: postgres
+      TYPEORM_ENTITIES: "**/*.entity.js,dist/**/*.entity.js"
+      TYPEORM_MIGRATIONS: ./src/migrations/*.{ts,js}
+      TYPEORM_MIGRATIONS_DIR: ./src/migrations
+      TYPEORM_SYNCHRONIZE: "false"
+      TYPEORM_SEEDING_FACTORIES: src/factories/**/*{.ts,.js}
+      TYPEORM_SEEDING_SEEDS: src/seeds/**/*{.ts,.js}
+    volumes:
+      - /app/node_modules
+      - ./server:/app
+    links:
+      - postgres
+    depends_on:
+      - postgres
+    command:
+      [
+        "./scripts/wait-for-it.sh",
+        "postgres:5432",
+        "--",
+        "sh",
+        "./scripts/start.sh",
+      ]
+    ports:
+      - "7777:7777"
