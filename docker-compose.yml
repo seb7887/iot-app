@@ -11,6 +11,12 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: "redis"
+    restart: always
+    ports:
+      - "6379:6379"
+
   api:
     build: ./server
     environment:
