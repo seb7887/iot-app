@@ -1,7 +1,7 @@
 import { Seeder, Factory } from 'typeorm-seeding'
 import { Connection } from 'typeorm'
 import { Group } from '../groups/group.entity'
-import { User } from '../users/user.entity'
+import { User, RoleType } from '../users/user.entity'
 import { getGroupId } from '../utils'
 
 export default class CreateUsers implements Seeder {
@@ -9,6 +9,7 @@ export default class CreateUsers implements Seeder {
     await factory(User)().create({
       email: 'admin@iot.com',
       password: 'admin1234',
+      role: RoleType.ADMIN,
       groupId: null
     })
     const groups = await connection

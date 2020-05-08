@@ -5,7 +5,7 @@ export class AuthDeviceDto {
   @IsNotEmpty()
   @IsUUID()
   @ApiProperty()
-  readonly serial: string
+  readonly deviceId: string
 
   @IsNotEmpty()
   @ApiProperty()

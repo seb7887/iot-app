@@ -1,0 +1,19 @@
+{
+  "name": "virtual-device",
+  "version": "1.0.0",
+  "description": "Test Virtual Device",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index | pino-pretty"
+  },
+  "author": "Sebastian Matias Segura (@seb7887)",
+  "license": "ISC",
+  "dependencies": {
+    "faker": "^4.1.0",
+    "mqtt": "^4.0.1",
+    "pino": "^6.2.1"
+  },
+  "devDependencies": {
+    "pino-pretty": "^4.0.0"
+  }
+}

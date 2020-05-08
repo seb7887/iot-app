@@ -7,7 +7,12 @@ import { DateTime } from 'luxon'
 
 import { Group } from '../groups/group.entity'
 import { Device } from './device.entity'
-import { CreateDeviceDto, ListDevicesDto, SearchDevicesDto } from './dto'
+import {
+  CreateDeviceDto,
+  ListDevicesDto,
+  SearchDevicesDto,
+  UpdateDeviceDto
+} from './dto'
 import { DeviceData, DeviceRO, DeviceListRO } from './device.interface'
 
 @Injectable()
@@ -123,8 +128,10 @@ export class DeviceService {
   async updateDeviceGroup(
     role: string,
     id: string,
-    groupId: string
+    dto: UpdateDeviceDto
   ): Promise<DeviceRO> {
+    const { groupId, connected, properties } = dto
+
     if (role !== 'admin') {
       const errors = { role: 'User must be admin' }
       throw new HttpException({ errors }, HttpStatus.UNAUTHORIZED)
@@ -141,11 +148,15 @@ export class DeviceService {
       throw new HttpException({ errors }, HttpStatus.NOT_FOUND)
     }
 
-    device.groupId = groupId
+    device.groupId = groupId ? groupId : device.groupId
+    device.connected = connected !== undefined ? connected : device.connected
+    device.properties = properties ? properties : device.properties
 
     const updatedDevice = await this.deviceRepository.save(device)
 
-    return this.buildDeviceRO(updatedDevice)
+    const { password, ...secureDevice } = updatedDevice
+
+    return this.buildDeviceRO(secureDevice)
   }
 
   async deleteDevice(role: string, id: string): Promise<DeviceRO> {
@@ -171,12 +182,12 @@ export class DeviceService {
   }
 
   async authDevice(
-    serial: string,
+    deviceId: string,
     secret: string
   ): Promise<Record<string, boolean>> {
     const qb = getRepository(Device)
       .createQueryBuilder('devices')
-      .where('devices.serial = :serial', { serial })
+      .where('devices.id = :deviceId', { deviceId })
       .andWhere('devices.password = :secret', { secret })
 
     const authenticated = await qb.getOne()
@@ -184,12 +195,12 @@ export class DeviceService {
     return authenticated ? { authenticated: true } : { authenticated: false }
   }
 
-  private buildDeviceRO(device: Device) {
+  private buildDeviceRO(device: Partial<Device>) {
     const deviceRO = {
       id: device.id,
       groupId: device.groupId,
       serial: device.serial,
-      secret: device.password,
+      ...(device.password && { secret: device.password }),
       connected: device.connected,
       properties: device.properties
     }

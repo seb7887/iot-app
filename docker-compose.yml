@@ -29,7 +29,7 @@ services:
       TYPEORM_PORT: 5432
       TYPEORM_DATABASE: postgres
       TYPEORM_ENTITIES: "**/*.entity.js,dist/**/*.entity.js"
-      TYPEORM_MIGRATIONS: ./src/migrations/*.{ts,js}
+      TYPEORM_MIGRATIONS: ./dist/migrations/*.js
       TYPEORM_MIGRATIONS_DIR: ./src/migrations
       TYPEORM_SYNCHRONIZE: "false"
       TYPEORM_SEEDING_FACTORIES: src/factories/**/*{.ts,.js}
