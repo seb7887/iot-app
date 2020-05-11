@@ -1,0 +1,37 @@
+{
+  "name": "worker",
+  "version": "1.0.0",
+  "description": "IoT App Worker",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "concurrently -i -n 'tsc,server' -c 'blue,green' 'tsc --watch --pretty' 'nodemon dist/index.js | pino-pretty'",
+    "start": "node dist/index.js",
+    "format": "prettier --write '**/*.{js,json,ts}'",
+    "lint": "eslint --cache --fix './src/**/*.{js,json,ts}'",
+    "tscheck": "tsc --noEmit --pretty",
+    "tscheck:watch": "tsc --noEmit --pretty --watch"
+  },
+  "author": "Sebastian Matias Segura (@seb7887)",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/isomorphic-fetch": "0.0.35",
+    "@types/node": "^13.13.5",
+    "@types/pino": "^6.0.0",
+    "@types/redis": "^2.8.20",
+    "@typescript-eslint/eslint-plugin": "^2.31.0",
+    "@typescript-eslint/parser": "^2.31.0",
+    "concurrently": "^5.2.0",
+    "nodemon": "^2.0.3",
+    "pino-pretty": "^4.0.0",
+    "prettier": "^2.0.5",
+    "ts-node": "^8.10.1",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "isomorphic-fetch": "^2.2.1",
+    "pino": "^6.2.1",
+    "redis": "^3.0.2"
+  }
+}

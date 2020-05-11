@@ -3,7 +3,7 @@ const faker = require('faker')
 const CATEGORIES = ['temperature', 'humidity', 'location']
 
 const randomCategory = () =>
-  CATEGORIES[Math.round(Math.random() * CATEGORIES.length)]
+  CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)]
 
 const randomValue = (category) => {
   const isNumeric = category === 'temperature' || category === 'humidity'

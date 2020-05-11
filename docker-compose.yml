@@ -76,3 +76,20 @@ services:
     ports:
       - "1883:1883"
       - "8881:8881"
+
+  worker:
+    build: ./worker
+    environment:
+      API_URL: http://api:7777/api
+      API_KEY: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IiIsInVzZXJuYW1lIjoiYXBpS2V5IiwiZW1haWwiOiJhcGlAa2V5LmNvbSIsInJvbGUiOiJhZG1pbiIsImdyb3VwSWQiOm51bGwsImp0aSI6ImE2Zjg3ZDA3LTIwOTctNDc0YS04YTM1LTJiMWZjMTA4OWUwNyIsImlhdCI6MTU4ODc4NTIxMCwiZXhwIjoxNTg4Nzg4ODEwfQ.jlk5VUwdE71BuV_nO4XikGWM9Sf-wxt4iDjPWDN2-aU
+      LOG_LEVEL: trace
+      REDIS_HOST: redis
+    volumes:
+      - /worker/node_modules
+      - ./worker:/worker
+    links:
+      - postgres
+      - redis
+    depends_on:
+      - postgres
+      - redis

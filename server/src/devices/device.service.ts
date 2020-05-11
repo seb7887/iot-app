@@ -150,7 +150,9 @@ export class DeviceService {
 
     device.groupId = groupId ? groupId : device.groupId
     device.connected = connected !== undefined ? connected : device.connected
-    device.properties = properties ? properties : device.properties
+    device.properties = properties
+      ? { ...device.properties, ...properties }
+      : device.properties
 
     const updatedDevice = await this.deviceRepository.save(device)
 
