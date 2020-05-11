@@ -12,14 +12,15 @@ const redisClient = redis.createClient({
 })
 
 export const processMessage = (packet: IPublishPacket) => {
-  const [deviceId, channel] = parseTopic(packet.topic)
+  const [deviceId, topic] = parseTopic(packet.topic)
 
   const payload = {
     deviceId,
+    topic,
     message: JSON.parse(packet.payload.toString()),
   }
 
-  if (channel !== 'configure') {
+  if (topic !== 'configure') {
     redisClient.publish('insert', JSON.stringify(payload))
   } else {
     processMQTTLog(deviceId, packet)
@@ -32,7 +33,7 @@ const processMQTTLog = (deviceId: string, packet: IPublishPacket) => {
   updateDevice(deviceId, {
     properties: state,
   })
-    .then(deviceResponse => {
+    .then(() => {
       const logPacket = generatePacket(
         `${deviceId}/_log`,
         JSON.stringify(state),

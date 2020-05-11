@@ -4,7 +4,7 @@
   "description": "Test Virtual Device",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index | pino-pretty"
+    "start": "pino-pretty | node src/index"
   },
   "author": "Sebastian Matias Segura (@seb7887)",
   "license": "ISC",
