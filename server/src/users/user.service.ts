@@ -3,7 +3,7 @@ import { HttpException } from '@nestjs/common/exceptions/http.exception'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, getRepository } from 'typeorm'
 import { sign, verify, decode } from 'jsonwebtoken'
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcryptjs'
 import { validate } from 'class-validator'
 
 import { SECRET } from '../config'
@@ -215,7 +215,7 @@ export class UserService {
     }
   }
 
-  public generateJWT(user) {
+  public generateJWT(user: User) {
     const today = new Date()
     const exp = new Date(today)
     exp.setDate(today.getDate() + 60)
@@ -225,6 +225,7 @@ export class UserService {
         id: user.id,
         username: user.username,
         email: user.email,
+        role: user.role,
         groupId: user.groupId,
         exp: exp.getTime() / 1000
       },

@@ -1,11 +1,10 @@
 # IoT App API server
 
-## TODO
+## Development
 
-- [x] Swagger
-- [ ] Seeds
-- [x] Groups
-- [x] Users
-- [x] Devices
-- [x] Logs
-- [x] Timeseries
+- `npm i`
+- Create a `.env` file based on `sample.env`
+
+## Documentation
+
+Go to `/docs` to see Swagger docs

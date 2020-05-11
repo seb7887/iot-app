@@ -7,7 +7,7 @@ import {
   UpdateDateColumn
 } from 'typeorm'
 import { IsEmail } from 'class-validator'
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcryptjs'
 
 export enum RoleType {
   USER = 'user',
@@ -30,7 +30,8 @@ export class User {
   password: string
   @BeforeInsert()
   hashPassword() {
-    this.password = bcrypt.hashSync(this.password, 10)
+    const salt = bcrypt.genSaltSync(10)
+    this.password = bcrypt.hashSync(this.password, salt)
   }
 
   @Column({ nullable: true, name: 'group_id' })
