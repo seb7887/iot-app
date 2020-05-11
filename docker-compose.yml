@@ -51,3 +51,28 @@ services:
       ]
     ports:
       - "7777:7777"
+
+  broker:
+    build: ./broker
+    environment:
+      API_URL: http://api:7777/api
+      API_KEY: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IiIsInVzZXJuYW1lIjoiYXBpS2V5IiwiZW1haWwiOiJhcGlAa2V5LmNvbSIsInJvbGUiOiJhZG1pbiIsImdyb3VwSWQiOm51bGwsImp0aSI6ImE2Zjg3ZDA3LTIwOTctNDc0YS04YTM1LTJiMWZjMTA4OWUwNyIsImlhdCI6MTU4ODc4NTIxMCwiZXhwIjoxNTg4Nzg4ODEwfQ.jlk5VUwdE71BuV_nO4XikGWM9Sf-wxt4iDjPWDN2-aU
+      NODE_ENV: development
+      LOG_LEVEL: trace
+      REDIS_HOST: redis
+      MQTT_PORT: 1883
+      WS_PORT: 8881
+      TLS_PORT: 8883
+      SSL_PORT: 443
+    volumes:
+      - /broker/node_modules
+      - ./broker:/broker
+    links:
+      - postgres
+      - redis
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "1883:1883"
+      - "8881:8881"

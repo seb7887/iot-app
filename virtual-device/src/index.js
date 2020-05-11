@@ -2,6 +2,7 @@ const mqtt = require('mqtt')
 const faker = require('faker')
 
 const logger = require('./lib/logger')
+const generateMessage = require('./lib/message')
 
 const argv = process.argv.slice(2)
 
@@ -26,6 +27,12 @@ client.on('connect', () => {
   client.subscribe(`${deviceId}/configure`, () => {
     logger.trace(`Subscribed to ${deviceId}/configure`)
   })
+
+  if (publish) {
+    const message = generateMessage()
+    client.publish(`${deviceId}/telemetry`, JSON.stringify(message))
+    logger.info({ message }, `Message published on topic 'telemetry'`)
+  }
 })
 
 client.on('message', (topic, payload) => {

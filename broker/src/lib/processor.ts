@@ -21,7 +21,7 @@ export const processMessage = (packet: IPublishPacket) => {
   }
 
   if (topic !== 'configure') {
-    redisClient.publish('insert', JSON.stringify(payload))
+    redisClient.publish('telemetry', JSON.stringify(payload))
   } else {
     processMQTTLog(deviceId, packet)
   }
