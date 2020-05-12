@@ -22,8 +22,13 @@ export const AuthProvider: React.FunctionComponent = props => {
   const logout = () => console.log('logout')
 
   const getUser = () => {
-    const storageUser = localStorage.getItem('user')
-    const user = storageUser ? JSON.parse(storageUser) : null
+    let user
+
+    if (typeof localStorage !== 'undefined') {
+      const storageUser = localStorage.getItem('user')
+      user = storageUser ? JSON.parse(storageUser) : null
+    }
+
     setUser(user)
   }
 
@@ -40,13 +45,13 @@ export const AuthProvider: React.FunctionComponent = props => {
 
   React.useEffect(() => {
     const handleRouteChange = (url: string) => {
-      if (url !== '/login' && url !== '/reset-password' && !user) {
+      if (url !== '/' && url !== '/reset-password' && !user) {
         window.location.href = '/login'
       }
     }
 
-    if (pathname !== '/login' && pathname !== '/reset-password' && !user) {
-      window.location.href = '/login'
+    if (pathname !== '/' && pathname !== '/reset-password' && !user) {
+      window.location.href = '/'
     }
 
     events.on('routeChangeStart', handleRouteChange)

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "next build",
-    "dev": "next",
+    "dev": "next -p 3333",
     "start": "next start",
     "lint": "eslint --cache --fix 'src/**/*.{js,ts,tsx}'",
     "format": "prettier --write 'src/**/*.{js,json,ts,tsx}'",
@@ -30,11 +30,14 @@
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.52",
     "@material-ui/pickers": "^3.2.10",
+    "dotenv": "^8.2.0",
+    "isomorphic-unfetch": "^3.0.0",
     "micro": "^9.3.4",
     "next": "^9.4.0",
     "next-routes": "^1.4.2",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "universal-cookie": "^4.0.3"
   },
   "husky": {
     "hooks": {
