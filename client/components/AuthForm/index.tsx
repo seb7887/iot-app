@@ -50,7 +50,11 @@ const AuthForm: React.FunctionComponent<Props> = props => {
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault()
     const type: AuthType = activeTab === 0 ? 'login' : 'register'
-    onSubmit(type, state)
+    onSubmit(type, {
+      username: state.username,
+      email: state.email,
+      password: state.password
+    })
   }
 
   return (

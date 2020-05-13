@@ -2,7 +2,6 @@ import { NextPageContext } from 'next/types'
 import Cookies from 'universal-cookie'
 
 import { validateJwt } from '../services/api'
-import { redirectUser } from '../services/nav'
 
 export class Token {
   public saveToken(token: string) {

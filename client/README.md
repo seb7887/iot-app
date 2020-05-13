@@ -3,7 +3,8 @@
 ## TODO
 
 - [x] theming
-- [ ] layout
+- [x] layout
+- [ ] fonts
 - [x] login/register
 - [ ] devices
   - [ ] list
