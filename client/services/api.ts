@@ -94,3 +94,43 @@ export const validateJwt = async (jwt: string) => {
 
   return apiCall<ValidateResponse>('/users/validate-jwt', options)
 }
+
+export const login = async (email: string, password: string) => {
+  const options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      email,
+      password
+    })
+  }
+
+  return apiCall<UserResponse>('/users/login', options)
+}
+
+interface RegisterRequest {
+  username: string
+  email: string
+  password: string
+}
+
+export const register = async (req: RegisterRequest) => {
+  const { username, email, password } = req
+
+  const options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      username,
+      email,
+      password,
+      role: 'admin'
+    })
+  }
+
+  return apiCall<UserResponse>('/users', options)
+}

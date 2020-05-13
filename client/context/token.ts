@@ -11,6 +11,16 @@ export class Token {
     return Promise.resolve()
   }
 
+  public getToken() {
+    const cookies = new Cookies()
+    return cookies.get('token')
+  }
+
+  public clearToken() {
+    const cookies = new Cookies()
+    cookies.remove('token')
+  }
+
   public checkAuthToken(token: string) {
     return validateJwt(token)
   }
@@ -19,9 +29,11 @@ export class Token {
     const cookies = new Cookies(ctx.req ? ctx.req.headers.cookie : null)
     const token = cookies.get('token')
 
-    const res = await this.checkAuthToken(token)
-    if (!res) {
-      redirectUser('/', ctx)
+    if (!token) {
+      return false
     }
+
+    const res = await this.checkAuthToken(token)
+    return res.isValid
   }
 }

@@ -15,6 +15,7 @@ export default class MyDocument extends Document {
             content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
           />
           <meta name="theme-color" content={theme.palette.background.default} />
+          <link rel="shortcut icon" href="/favicon.ico" />
           <link
             rel="stylesheet"
             href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"

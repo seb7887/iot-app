@@ -1,65 +1,78 @@
 import React from 'react'
 import { useRouter } from 'next/router'
 
+import { login, register } from '../services/api'
+import { Token } from './token'
+
 interface Auth {
-  user: Record<string, any> | null
-  login: () => void
-  logout: () => void
-  register: () => void
+  signIn: (email: string, password: string) => Promise<Partial<User>>
+  signOut: () => void
+  signUp: (
+    username: string,
+    email: string,
+    password: string
+  ) => Promise<Partial<User>>
 }
 
 const AuthContext = React.createContext<Auth | null>(null)
 AuthContext.displayName = 'AuthContext'
 
 export const AuthProvider: React.FunctionComponent = props => {
-  const [user, setUser] = React.useState(null)
-  const { pathname, events } = useRouter()
+  const { push } = useRouter()
 
-  const login = () => console.log('login')
+  const signIn = async (email: string, password: string) => {
+    const { user } = await login(email, password)
+    const cookie = new Token()
 
-  const register = () => console.log('register')
-
-  const logout = () => console.log('logout')
-
-  const getUser = () => {
-    let user
-
-    if (typeof localStorage !== 'undefined') {
-      const storageUser = localStorage.getItem('user')
-      user = storageUser ? JSON.parse(storageUser) : null
+    if (!user) {
+      throw new Error('Invalid email or password')
     }
 
-    setUser(user)
+    if (user.token) {
+      cookie.saveToken(user.token)
+      push('/dashboard')
+    }
+
+    const { token, resetToken, ...filtered } = user
+    return filtered
   }
 
-  React.useEffect(() => {
-    getUser()
-  }, [pathname])
+  const signUp = async (username: string, email: string, password: string) => {
+    const { user } = await register({
+      username,
+      email,
+      password
+    })
 
-  const value = React.useMemo(() => ({ user, login, register, logout }), [
-    login,
-    logout,
-    register,
-    user
+    if (!user) {
+      throw new Error('Sign Up error. Try again!')
+    }
+
+    const {
+      user: { token }
+    } = await login(email, password)
+    const cookie = new Token()
+
+    if (token) {
+      cookie.saveToken(token)
+      push('/dashboard')
+    }
+
+    const { resetToken, ...filtered } = user
+    return filtered
+  }
+
+  const signOut = () => {
+    const cookie = new Token()
+    cookie.clearToken()
+    push('/')
+  }
+
+  const value = React.useMemo(() => ({ signIn, signOut, signUp }), [
+    signIn,
+    signOut,
+    signUp
   ])
-
-  React.useEffect(() => {
-    const handleRouteChange = (url: string) => {
-      if (url !== '/' && url !== '/reset-password' && !user) {
-        window.location.href = '/login'
-      }
-    }
-
-    if (pathname !== '/' && pathname !== '/reset-password' && !user) {
-      window.location.href = '/'
-    }
-
-    events.on('routeChangeStart', handleRouteChange)
-
-    return () => {
-      events.off('routeChangeStart', handleRouteChange)
-    }
-  }, [user])
 
   return <AuthContext.Provider value={value} {...props} />
 }

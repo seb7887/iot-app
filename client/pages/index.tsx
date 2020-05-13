@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { makeStyles, Theme } from '@material-ui/core/styles'
@@ -8,14 +8,57 @@ import Paper from '@material-ui/core/Paper'
 import Avatar from '@material-ui/core/Avatar'
 import LockIcon from '@material-ui/icons/LockOutlined'
 
-// import { useAuth } from '../context'
+import { useAuth } from '../context'
+import { authInitialProps } from '../lib'
 import AuthForm from '../components/AuthForm'
 
-const Login: NextPage = () => {
+interface State {
+  loading: boolean
+  error: string
+}
+
+const Index: NextPage = () => {
+  const [state, setState] = useState<State>({
+    loading: false,
+    error: ''
+  })
+  const { signIn, signUp } = useAuth()
   const styles = useStyles()
   const router = useRouter()
+  const { loading, error } = state
 
-  const submit = () => {}
+  const submit = async (
+    type: AuthType,
+    credentials: Record<string, string>
+  ) => {
+    setState(prev => ({
+      ...prev,
+      loading: true
+    }))
+    try {
+      let user
+      if (type === 'login') {
+        user = await signIn(credentials.email, credentials.password)
+      } else {
+        user = await signUp(
+          credentials.username,
+          credentials.email,
+          credentials.password
+        )
+      }
+      localStorage.setItem('user', JSON.stringify(user))
+      setState(prev => ({
+        ...prev,
+        loading: false
+      }))
+    } catch (err) {
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: err.message
+      }))
+    }
+  }
 
   const goToResetPassword = () => {
     router.push('/reset-password')
@@ -48,8 +91,8 @@ const Login: NextPage = () => {
           <AuthForm
             onSubmit={submit}
             onForgotPassword={goToResetPassword}
-            error=""
-            loading={false}
+            error={error}
+            loading={loading}
           />
         </div>
       </Grid>
@@ -57,13 +100,15 @@ const Login: NextPage = () => {
   )
 }
 
+Index.getInitialProps = authInitialProps()
+
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
     height: '100vh'
   },
   logoContainer: {
     background:
-      'linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(61,52,139,1) 79%)'
+      'linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(126,82,160,1) 79%)'
   },
   logo: {
     width: '45%',
@@ -86,4 +131,4 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }))
 
-export default Login
+export default Index

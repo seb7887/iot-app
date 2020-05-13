@@ -11,7 +11,7 @@ import { Alert } from '@material-ui/lab'
 import { useStyles } from './styles'
 
 interface Props {
-  onSubmit: () => void
+  onSubmit: (type: AuthType, state: Record<string, string>) => Promise<void>
   onForgotPassword: () => void
   error: string
   loading: boolean
@@ -35,6 +35,7 @@ const AuthForm: React.FunctionComponent<Props> = props => {
   const styles = useStyles()
 
   const handleTabChange = (event: React.ChangeEvent<{}>, value: any) => {
+    event.preventDefault()
     setActiveTab(value)
   }
 
@@ -48,7 +49,8 @@ const AuthForm: React.FunctionComponent<Props> = props => {
 
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault()
-    onSubmit()
+    const type: AuthType = activeTab === 0 ? 'login' : 'register'
+    onSubmit(type, state)
   }
 
   return (
