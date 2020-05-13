@@ -1,5 +1,6 @@
 import React from 'react'
 import { NextPage } from 'next'
+import { useRouter } from 'next/router'
 import { makeStyles, Theme } from '@material-ui/core/styles'
 import Grid from '@material-ui/core/Grid'
 import Typography from '@material-ui/core/Typography'
@@ -8,9 +9,17 @@ import Avatar from '@material-ui/core/Avatar'
 import LockIcon from '@material-ui/icons/LockOutlined'
 
 // import { useAuth } from '../context'
+import AuthForm from '../components/AuthForm'
 
 const Login: NextPage = () => {
   const styles = useStyles()
+  const router = useRouter()
+
+  const submit = () => {}
+
+  const goToResetPassword = () => {
+    router.push('/reset-password')
+  }
 
   return (
     <Grid className={styles.root} container component="main">
@@ -32,9 +41,17 @@ const Login: NextPage = () => {
         elevation={7}
         square
       >
-        <Avatar>
-          <LockIcon />
-        </Avatar>
+        <div className={styles.container}>
+          <Avatar className={styles.avatar}>
+            <LockIcon />
+          </Avatar>
+          <AuthForm
+            onSubmit={submit}
+            onForgotPassword={goToResetPassword}
+            error=""
+            loading={false}
+          />
+        </div>
       </Grid>
     </Grid>
   )
@@ -52,7 +69,12 @@ const useStyles = makeStyles((theme: Theme) => ({
     width: '45%',
     height: '50%'
   },
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: theme.palette.primary.main
+  },
   container: {
+    margin: theme.spacing(0, 4),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
