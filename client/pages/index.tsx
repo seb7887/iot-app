@@ -47,6 +47,7 @@ const Index: NextPage = () => {
         )
       }
       localStorage.setItem('user', JSON.stringify(user))
+      router.reload()
       setState(prev => ({
         ...prev,
         loading: false

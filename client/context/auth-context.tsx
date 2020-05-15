@@ -1,5 +1,4 @@
 import React from 'react'
-import { useRouter } from 'next/router'
 
 import { login, register } from '../services/api'
 import { Token } from './token'
@@ -18,8 +17,6 @@ const AuthContext = React.createContext<Auth | null>(null)
 AuthContext.displayName = 'AuthContext'
 
 export const AuthProvider: React.FunctionComponent = props => {
-  const { push } = useRouter()
-
   const signIn = async (email: string, password: string) => {
     const { user } = await login(email, password)
     const cookie = new Token()
@@ -30,7 +27,6 @@ export const AuthProvider: React.FunctionComponent = props => {
 
     if (user.token) {
       cookie.saveToken(user.token)
-      push('/dashboard')
     }
 
     const { token, resetToken, ...filtered } = user
@@ -55,7 +51,6 @@ export const AuthProvider: React.FunctionComponent = props => {
 
     if (token) {
       cookie.saveToken(token)
-      push('/dashboard')
     }
 
     const { resetToken, ...filtered } = user
@@ -65,7 +60,6 @@ export const AuthProvider: React.FunctionComponent = props => {
   const signOut = () => {
     const cookie = new Token()
     cookie.clearToken()
-    push('/')
   }
 
   const value = React.useMemo(() => ({ signIn, signOut, signUp }), [

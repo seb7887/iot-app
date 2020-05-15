@@ -1,5 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import Drawer from '@material-ui/core/Drawer'
 import Divider from '@material-ui/core/Divider'
 import List from '@material-ui/core/List'
@@ -15,6 +16,7 @@ import AdminsIcon from '@material-ui/icons/SupervisorAccount'
 import ProfileIcon from '@material-ui/icons/PersonOutline'
 import SignOutIcon from '@material-ui/icons/ExitToApp'
 
+import { useAuth } from '../../context'
 import { useStyles } from './style'
 
 interface MenuItem {
@@ -52,7 +54,14 @@ const menu: MenuItem[] = [
 ]
 
 const Layout: React.FunctionComponent = props => {
+  const { signOut } = useAuth()
+  const router = useRouter()
   const styles = useStyles()
+
+  const logout = () => {
+    signOut()
+    router.push('/')
+  }
 
   return (
     <div className={styles.root}>
@@ -62,7 +71,7 @@ const Layout: React.FunctionComponent = props => {
         anchor="left"
         PaperProps={{ className: styles.sidebar, elevation: 6 }}
       >
-        <Link href="/dashboard" prefetch>
+        <Link href="/dashboard">
           <Typography variant="h3" color="primary" className={styles.brand}>
             IoT
           </Typography>
@@ -76,7 +85,7 @@ const Layout: React.FunctionComponent = props => {
               placement="right"
               key={`tooltip-${index}`}
             >
-              <Link href={item.to} prefetch>
+              <Link href={item.to}>
                 <ListItem button key={item.label} className={styles.item}>
                   {item.icon && (
                     <ListItemIcon className={styles.icon}>
@@ -97,7 +106,7 @@ const Layout: React.FunctionComponent = props => {
               aria-label="my-account"
               placement="right"
             >
-              <Link href="/my-account" prefetch>
+              <Link href="/my-account">
                 <ListItem button className={styles.item}>
                   <ListItemIcon className={styles.icon}>
                     <ProfileIcon />
@@ -107,7 +116,7 @@ const Layout: React.FunctionComponent = props => {
               </Link>
             </Tooltip>
             <Tooltip title="Sign Out" aria-label="logout" placement="right">
-              <ListItem button className={styles.item}>
+              <ListItem button className={styles.item} onClick={logout}>
                 <ListItemIcon className={styles.icon}>
                   <SignOutIcon />
                 </ListItemIcon>
