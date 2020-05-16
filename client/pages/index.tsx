@@ -1,6 +1,5 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { NextPage } from 'next'
-import { useRouter } from 'next/router'
 import { makeStyles, Theme } from '@material-ui/core/styles'
 import Grid from '@material-ui/core/Grid'
 import Typography from '@material-ui/core/Typography'
@@ -8,62 +7,11 @@ import Paper from '@material-ui/core/Paper'
 import Avatar from '@material-ui/core/Avatar'
 import LockIcon from '@material-ui/icons/LockOutlined'
 
-import { useAuth } from '../context'
 import { authInitialProps } from '../lib'
 import AuthForm from '../components/AuthForm'
 
-interface State {
-  loading: boolean
-  error: string
-}
-
 const Index: NextPage = () => {
-  const [state, setState] = useState<State>({
-    loading: false,
-    error: ''
-  })
-  const { signIn, signUp } = useAuth()
   const styles = useStyles()
-  const router = useRouter()
-  const { loading, error } = state
-
-  const submit = async (
-    type: AuthType,
-    credentials: Record<string, string>
-  ) => {
-    setState(prev => ({
-      ...prev,
-      loading: true
-    }))
-    try {
-      let user
-      if (type === 'login') {
-        user = await signIn(credentials.email, credentials.password)
-      } else {
-        user = await signUp(
-          credentials.username,
-          credentials.email,
-          credentials.password
-        )
-      }
-      localStorage.setItem('user', JSON.stringify(user))
-      router.reload()
-      setState(prev => ({
-        ...prev,
-        loading: false
-      }))
-    } catch (err) {
-      setState(prev => ({
-        ...prev,
-        loading: false,
-        error: err.message
-      }))
-    }
-  }
-
-  const goToResetPassword = () => {
-    router.push('/reset-password')
-  }
 
   return (
     <Grid className={styles.root} container component="main">
@@ -89,12 +37,7 @@ const Index: NextPage = () => {
           <Avatar className={styles.avatar}>
             <LockIcon />
           </Avatar>
-          <AuthForm
-            onSubmit={submit}
-            onForgotPassword={goToResetPassword}
-            error={error}
-            loading={loading}
-          />
+          <AuthForm />
         </div>
       </Grid>
     </Grid>
