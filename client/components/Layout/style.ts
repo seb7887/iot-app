@@ -16,7 +16,8 @@ export const useStyles = makeStyles((theme: Theme) => ({
   },
   brand: {
     marginBottom: theme.spacing(2),
-    cursor: 'pointer'
+    cursor: 'pointer',
+    fontFamily: 'Bungee Inline'
   },
   divider: {
     backgroundColor: theme.palette.primary.main

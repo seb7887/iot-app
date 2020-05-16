@@ -70,7 +70,7 @@ const Index: NextPage = () => {
       <Grid className={styles.logoContainer} item xs={false} sm={4} md={7}>
         <div className={styles.container}>
           <img src="/logo.png" alt="logo" className={styles.logo} />
-          <Typography variant="h1" align="center">
+          <Typography variant="h2" align="center" className={styles.logoTitle}>
             IoT
           </Typography>
         </div>
@@ -114,6 +114,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   logo: {
     width: '45%',
     height: '50%'
+  },
+  logoTitle: {
+    fontFamily: 'Bungee Inline'
   },
   avatar: {
     margin: theme.spacing(1),
