@@ -4,7 +4,7 @@
 
 - [x] theming
 - [x] layout
-- [ ] fonts
+- [x] fonts
 - [x] login/register
 - [ ] devices
   - [ ] list
