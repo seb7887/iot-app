@@ -6,6 +6,7 @@
 - [x] layout
 - [x] fonts
 - [x] login/register
+- [x] home dashboard
 - [ ] devices
   - [ ] list
   - [ ] overview

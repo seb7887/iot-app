@@ -10,8 +10,8 @@ export class Token {
     return Promise.resolve()
   }
 
-  public getToken() {
-    const cookies = new Cookies()
+  public getToken(ctx?: NextPageContext) {
+    const cookies = new Cookies(ctx?.req ? ctx.req.headers.cookie : null)
     return cookies.get('token')
   }
 

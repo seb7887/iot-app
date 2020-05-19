@@ -1,10 +1,13 @@
+import { NextPageContext } from 'next'
 import fetch from 'isomorphic-unfetch'
-import Cookies from 'universal-cookie'
+
+import { Token } from '../context'
 
 export const apiCall = async <T>(path: string, options: {}) => {
   try {
     let payload
-    const res = await fetch(`${process.env.API_URL}${path}`, options)
+    const url = `${process.env.API_URL}${path}`
+    const res = await fetch(url, options)
 
     try {
       payload = await res.json()
@@ -18,15 +21,13 @@ export const apiCall = async <T>(path: string, options: {}) => {
   }
 }
 
-const getToken = () => {
-  const cookies = new Cookies()
-  const token = cookies.get('token')
-
-  return token
+const getToken = (ctx?: NextPageContext) => {
+  const cookies = new Token()
+  return cookies.getToken(ctx)
 }
 
-export const apiGet = async <T>(path: string) => {
-  const token = getToken()
+export const apiGet = async <T>(path: string, ctx?: NextPageContext) => {
+  const token = getToken(ctx)
   const options = {
     method: 'GET',
     headers: {
