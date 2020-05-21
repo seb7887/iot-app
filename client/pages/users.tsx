@@ -11,6 +11,7 @@ interface Props {
 }
 
 const Users: NextPage<Props> = ({ users }) => {
+  console.log('users', users)
   return (
     <Layout>
       <h1>Users</h1>
@@ -23,7 +24,7 @@ export const getServerSideProps = async (ctx: NextPageContext) => {
   const auth = await authPromise(ctx)
 
   const users = await apiGet(
-    '/users?page=1&pageSize=20&sortBy=email&sortOrder=ASC'
+    '/users?role=user&page=1&pageSize=20&sortBy=email&sortOrder=ASC'
   )
 
   return {

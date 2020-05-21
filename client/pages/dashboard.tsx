@@ -52,9 +52,8 @@ const Dashboard: NextPage<Props> = ({ entities }) => {
           style={{ height: '100%' }}
         >
           {entities.map((entity, index) => (
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={4} key={`${entity.title}-${index}`}>
               <EntityCard
-                key={entity.title}
                 title={capitalize(entity.title)}
                 count={entity.count}
                 icon={icon[entity.title]}

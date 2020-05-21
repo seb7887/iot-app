@@ -6,7 +6,7 @@ import { validateJwt } from '../services/api'
 export class Token {
   public saveToken(token: string) {
     const cookies = new Cookies()
-    cookies.set('token', token, { path: '/' })
+    cookies.set('token', token, { path: '/', maxAge: 31536000 })
     return Promise.resolve()
   }
 
