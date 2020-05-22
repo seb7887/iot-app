@@ -12,10 +12,14 @@ import { LogsModule } from './logs/logs.module'
 import { TimeseriesModule } from './timeseries/timeseries.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Connection } from 'typeorm'
+import { LoggerModule } from 'nestjs-pino'
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(),
+    LoggerModule.forRoot({
+      pinoHttp: { level: process.env.LOG_LEVEL || 'trace' }
+    }),
     UserModule,
     GroupModule,
     DeviceModule,

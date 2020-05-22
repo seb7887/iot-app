@@ -5,6 +5,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import * as compression from 'compression'
 import * as helmet from 'helmet'
 import * as rateLimit from 'express-rate-limit'
+import { Logger } from 'nestjs-pino'
 
 async function bootstrap() {
   const appOptions = { cors: true }
@@ -22,6 +23,7 @@ async function bootstrap() {
       max: 100 // limit each IP to 100 request per windowMs
     })
   )
+  app.useLogger(app.get(Logger))
 
   const options = new DocumentBuilder()
     .setTitle('NestJS IoT App')
