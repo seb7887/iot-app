@@ -67,14 +67,14 @@ export class UserService {
 
     const [users, count] = await getRepository(User)
       .createQueryBuilder('users')
-      .where(groupId ? 'users.group_id = :groupId' : '1 = 1', { groupId })
-      .andWhere(role ? 'users.role = :role' : '1 = 1', {
+      .where(groupId ? 'users.group_id = :groupId' : '1=1', { groupId })
+      .andWhere(role ? 'users.role = :role' : '1=1', {
         role
       })
-      .andWhere(email ? 'users.email ILIKE :email' : '1:1', {
+      .andWhere(email ? 'users.email ILIKE :email' : '1=1', {
         email: `%${email}%`
       })
-      .andWhere(username ? 'users.username ILIKE :username' : '1:1', {
+      .andWhere(username ? 'users.username ILIKE :username' : '1=1', {
         username: `%${username}%`
       })
       .orderBy(sortBy, sortOrder)

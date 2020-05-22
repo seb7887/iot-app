@@ -14,7 +14,9 @@
   "author": "Sebastian Matias Segura (@seb7887)",
   "license": "ISC",
   "devDependencies": {
+    "@types/lodash.capitalize": "^4.2.6",
     "@types/micro": "^7.3.3",
+    "@types/nprogress": "^0.2.0",
     "@types/react": "^16.9.35",
     "@types/react-dom": "^16.9.8",
     "@typescript-eslint/eslint-plugin": "^2.32.0",
@@ -32,12 +34,17 @@
     "@material-ui/pickers": "^3.2.10",
     "clsx": "^1.1.0",
     "dotenv": "^8.2.0",
+    "formik": "^2.1.4",
     "isomorphic-unfetch": "^3.0.0",
+    "lodash.capitalize": "^4.2.1",
     "micro": "^9.3.4",
     "next": "^9.4.0",
     "next-routes": "^1.4.2",
+    "nprogress": "^0.2.0",
     "react": "^16.13.1",
+    "react-countup": "^4.3.3",
     "react-dom": "^16.13.1",
+    "swr": "^0.2.0",
     "universal-cookie": "^4.0.3"
   },
   "husky": {

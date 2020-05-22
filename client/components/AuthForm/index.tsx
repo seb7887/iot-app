@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { useRouter } from 'next/router'
+import { useFormik } from 'formik'
 import Link from '@material-ui/core/Link'
 import Button from '@material-ui/core/Button'
 import CircularProgress from '@material-ui/core/CircularProgress'
@@ -8,29 +10,40 @@ import Tabs from '@material-ui/core/Tabs'
 import Tab from '@material-ui/core/Tab'
 import { Alert } from '@material-ui/lab'
 
+import { useAuth } from '../../context'
 import { useStyles } from './styles'
 
-interface Props {
-  onSubmit: (type: AuthType, state: Record<string, string>) => Promise<void>
-  onForgotPassword: () => void
-  error: string
-  loading: boolean
-}
-
-interface State {
-  email: string
-  username: string
-  password: string
-}
-
-const AuthForm: React.FunctionComponent<Props> = props => {
+const AuthForm: React.FunctionComponent = () => {
   const [activeTab, setActiveTab] = useState<number>(0)
-  const [state, setState] = useState<State>({
-    email: '',
-    username: '',
-    password: ''
+  const router = useRouter()
+  const { signIn, signUp } = useAuth()
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      username: '',
+      password: ''
+    },
+    onSubmit: async (values, actions) => {
+      actions.setSubmitting(true)
+      const type: AuthType = activeTab === 0 ? 'login' : 'register'
+
+      try {
+        let user
+        if (type === 'login') {
+          user = await signIn(values.email, values.password)
+        } else {
+          user = await signUp(values.username, values.email, values.password)
+        }
+        localStorage.setItem('user', JSON.stringify(user))
+        router.reload()
+      } catch (err) {
+        actions.setErrors({
+          password: err.message
+        })
+      }
+      actions.setSubmitting(false)
+    }
   })
-  const { onSubmit, onForgotPassword, error, loading } = props
   const isLogin = activeTab === 0
   const styles = useStyles()
 
@@ -39,29 +52,15 @@ const AuthForm: React.FunctionComponent<Props> = props => {
     setActiveTab(value)
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setState(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
-
-  const handleSubmit = (e: React.SyntheticEvent) => {
-    e.preventDefault()
-    const type: AuthType = activeTab === 0 ? 'login' : 'register'
-    onSubmit(type, {
-      username: state.username,
-      email: state.email,
-      password: state.password
-    })
+  const goToResetPassword = () => {
+    router.push('/reset-password')
   }
 
   return (
     <>
-      {error && (
+      {formik.errors.password && (
         <Alert severity="error" className={styles.alert}>
-          {error}
+          {formik.errors.password}
         </Alert>
       )}
       <Tabs
@@ -73,7 +72,7 @@ const AuthForm: React.FunctionComponent<Props> = props => {
         <Tab label="Sign In" />
         <Tab label="Sign Up" />
       </Tabs>
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={formik.handleSubmit} className={styles.form}>
         <TextField
           variant="outlined"
           margin="normal"
@@ -83,7 +82,7 @@ const AuthForm: React.FunctionComponent<Props> = props => {
           label="Email Address"
           name="email"
           autoFocus
-          onChange={handleInputChange}
+          onChange={formik.handleChange}
         />
         {!isLogin && (
           <TextField
@@ -94,7 +93,7 @@ const AuthForm: React.FunctionComponent<Props> = props => {
             id="username"
             label="Username"
             name="username"
-            onChange={handleInputChange}
+            onChange={formik.handleChange}
           />
         )}
         <TextField
@@ -106,10 +105,10 @@ const AuthForm: React.FunctionComponent<Props> = props => {
           type="password"
           label="Password"
           name="password"
-          onChange={handleInputChange}
+          onChange={formik.handleChange}
         />
         <div className={styles.formActions}>
-          {loading ? (
+          {formik.isSubmitting ? (
             <CircularProgress size={30} />
           ) : (
             <Button type="submit" fullWidth variant="contained" color="primary">
@@ -118,12 +117,12 @@ const AuthForm: React.FunctionComponent<Props> = props => {
           )}
         </div>
       </form>
-      {!loading && isLogin && (
+      {!formik.isSubmitting && isLogin && (
         <Grid container>
           <Link
             variant="body1"
             className={styles.link}
-            onClick={onForgotPassword}
+            onClick={goToResetPassword}
           >
             Forgot password?
           </Link>

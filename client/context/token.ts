@@ -6,12 +6,12 @@ import { validateJwt } from '../services/api'
 export class Token {
   public saveToken(token: string) {
     const cookies = new Cookies()
-    cookies.set('token', token, { path: '/' })
+    cookies.set('token', token, { path: '/', maxAge: 31536000 })
     return Promise.resolve()
   }
 
-  public getToken() {
-    const cookies = new Cookies()
+  public getToken(ctx?: NextPageContext) {
+    const cookies = new Cookies(ctx?.req ? ctx.req.headers.cookie : null)
     return cookies.get('token')
   }
 

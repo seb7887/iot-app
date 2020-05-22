@@ -59,7 +59,7 @@ export class UserController {
   async login(@Body() loginUserDto: LoginUserDto): Promise<UserRO> {
     const _user = await this.userService.findOne(loginUserDto)
 
-    const errors = { User: 'Not Found' }
+    const errors = { User: 'Invalid email or password' }
     if (!_user) {
       throw new HttpException({ errors }, 401)
     }

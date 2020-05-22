@@ -4,24 +4,39 @@ const drawerWidth = 240
 
 export const useStyles = makeStyles((theme: Theme) => ({
   root: {
+    display: 'flex'
+  },
+  drawer: {
+    width: drawerWidth,
+    flexShrink: 0
+  },
+  sidebar: {
+    padding: theme.spacing(4),
+    backgroundColor: theme.palette.background.default
+  },
+  brand: {
+    marginBottom: theme.spacing(2),
+    cursor: 'pointer',
+    fontFamily: 'Bungee Inline'
+  },
+  divider: {
+    backgroundColor: theme.palette.primary.main
+  },
+  icon: {
+    color: theme.palette.text.primary
+  },
+  item: {
+    transition: 'all 0.2s',
+    color: theme.palette.text.primary,
+    '&:hover': {
+      opacity: 0.5,
+      color: theme.palette.primary.main
+    }
+  },
+  content: {
+    flexGrow: 1,
     display: 'flex',
-    overflowY: 'scroll',
-    overflowX: 'hidden',
-    height: '100%'
-  },
-  appBar: {
-    zIndex: theme.zIndex.drawer + 1,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen
-    })
-  },
-  appBarShift: {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen
-    })
+    flexDirection: 'column',
+    padding: theme.spacing(3)
   }
 }))
