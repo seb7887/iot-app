@@ -18,7 +18,7 @@ import SignOutIcon from '@material-ui/icons/ExitToApp'
 import NProgress from 'nprogress'
 
 import { useAuth } from '../../context'
-import { useStyles } from './style'
+import { useStyles } from './styles'
 
 interface MenuItem {
   label: string
