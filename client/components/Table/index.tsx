@@ -32,6 +32,7 @@ interface Props {
   searchPlaceholder: string
   onChangePage: (page: number) => void
   onChangeRowsPerPage: (rowsPerPage: number) => void
+  onClickRow: (id: string) => void
   onChangeSearch: (text: string) => void
 }
 
@@ -45,6 +46,7 @@ const Table: React.FunctionComponent<Props> = ({
   searchText,
   searchPlaceholder,
   onChangePage,
+  onClickRow,
   onChangeRowsPerPage,
   onChangeSearch
 }) => {
@@ -107,7 +109,11 @@ const Table: React.FunctionComponent<Props> = ({
         </MuiTableHead>
         <MuiTableBody>
           {rows.map(row => (
-            <MuiTableRow key={row.id} className={styles.row}>
+            <MuiTableRow
+              key={row.id}
+              className={styles.row}
+              onClick={() => onClickRow(row.id)}
+            >
               {row.values.map((v, index) => (
                 <MuiTableCell align="right" key={`v-${index}`}>
                   {v}

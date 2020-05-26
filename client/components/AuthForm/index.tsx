@@ -8,7 +8,7 @@ import Grid from '@material-ui/core/Grid'
 import TextField from '@material-ui/core/TextField'
 import Tabs from '@material-ui/core/Tabs'
 import Tab from '@material-ui/core/Tab'
-import { Alert } from '@material-ui/lab'
+import Alert from '@material-ui/lab/Alert'
 
 import { useAuth } from '../../context'
 import { useStyles } from './styles'

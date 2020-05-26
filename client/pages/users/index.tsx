@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { NextPage, NextPageContext } from 'next'
+import { useRouter } from 'next/router'
 import Tooltip from '@material-ui/core/Tooltip'
 import IconButton from '@material-ui/core/IconButton'
 import UsersIcon from '@material-ui/icons/Person'
 import AddUserIcon from '@material-ui/icons/PersonAdd'
 
-import { authInitialProps } from '../lib'
-import { apiGet } from '../services/api'
-import Layout from '../components/Layout'
-import Toolbar from '../components/Toolbar'
-import Table from '../components/Table'
-import Error from '../components/Error'
+import { authInitialProps } from '../../lib'
+import { apiGet } from '../../services/api'
+import Layout from '../../components/Layout'
+import Toolbar from '../../components/Toolbar'
+import Table from '../../components/Table'
+import Error from '../../components/Error'
 
 interface Props {
   auth: boolean | null
@@ -32,6 +33,7 @@ const Users: NextPage<Props> = ({ initialData }) => {
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
+  const router = useRouter()
 
   const formatData = (data: User[]) => {
     return data.map(d => ({
@@ -68,6 +70,10 @@ const Users: NextPage<Props> = ({ initialData }) => {
     fetcher()
   }, [searchText])
 
+  const goToUserOverview = (id: string) => {
+    router.push(`/users/${id}`)
+  }
+
   if (error) {
     return <Error message={error} />
   }
@@ -92,6 +98,7 @@ const Users: NextPage<Props> = ({ initialData }) => {
           searchText={searchText}
           searchPlaceholder="Search by email"
           onChangePage={setPage}
+          onClickRow={goToUserOverview}
           onChangeRowsPerPage={setRowsPerPage}
           onChangeSearch={setSearchText}
         />
