@@ -12,6 +12,7 @@ interface Auth {
     password: string
   ) => Promise<Partial<User>>
   isAdmin: () => boolean
+  me: () => User
 }
 
 const AuthContext = React.createContext<Auth | null>(null)
@@ -71,12 +72,18 @@ export const AuthProvider: React.FunctionComponent = props => {
     return false
   }
 
-  const value = React.useMemo(() => ({ signIn, signOut, signUp, isAdmin }), [
-    signIn,
-    signOut,
-    signUp,
-    isAdmin
-  ])
+  const me = () => {
+    if (typeof localStorage !== 'undefined') {
+      const me = JSON.parse(localStorage.getItem('user') || '')
+      return me
+    }
+    return undefined
+  }
+
+  const value = React.useMemo(
+    () => ({ signIn, signOut, signUp, isAdmin, me }),
+    [signIn, signOut, signUp, isAdmin, me]
+  )
 
   return <AuthContext.Provider value={value} {...props} />
 }

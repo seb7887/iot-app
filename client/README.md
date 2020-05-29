@@ -24,7 +24,14 @@
     - [ ] send email
   - [x] list
   - [x] overview
-- [ ] admins
+  - [ ] delete API
+- [x] admins
 - [ ] user profile
+  - [ ] me API
 - [ ] reset password
-- [ ] admin & user pages (options in layout)
+- [x] admin & user pages (options in layout)
+
+## V2
+
+- User profile
+- User deletion
