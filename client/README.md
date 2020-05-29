@@ -1,6 +1,6 @@
 # IoT App Client side dashboard
 
-## TODO
+## V1
 
 - [x] theming
 - [x] layout
@@ -19,19 +19,21 @@
 - [ ] groups
   - [ ] main
   - [ ] subgroups
-- [ ] users
-  - [ ] create
-    - [ ] send email
+- [x] users
   - [x] list
   - [x] overview
-  - [ ] delete API
 - [x] admins
-- [ ] user profile
-  - [ ] me API
+- [x] my-account page
 - [ ] reset password
 - [x] admin & user pages (options in layout)
 
 ## V2
 
-- User profile
-- User deletion
+- [ ] layout page name
+- [ ] users
+  - [ ] create -> emailer
+  - [ ] more fields
+  - [ ] user delete API
+- [ ] my account
+  - [ ] profile
+  - [ ] me API
