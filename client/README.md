@@ -23,7 +23,7 @@
   - [ ] create
     - [ ] send email
   - [x] list
-  - [ ] overview
+  - [x] overview
 - [ ] admins
 - [ ] user profile
 - [ ] reset password

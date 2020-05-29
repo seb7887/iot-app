@@ -61,9 +61,16 @@ Router.events.on('onRouteChangeComplete', () => NProgress.done())
 Router.events.on('onRouteChangeError', () => NProgress.done())
 
 const Layout: React.FunctionComponent = props => {
-  const { signOut } = useAuth()
+  const { signOut, isAdmin } = useAuth()
   const router = useRouter()
   const styles = useStyles()
+
+  const getMenu = () => {
+    if (isAdmin()) {
+      return menu
+    }
+    return menu.slice(0, 2)
+  }
 
   const logout = () => {
     signOut()
@@ -85,7 +92,7 @@ const Layout: React.FunctionComponent = props => {
         </Link>
         <Divider classes={{ root: styles.divider }} />
         <List>
-          {menu.map((item, index) => (
+          {getMenu().map((item, index) => (
             <Link href={item.to} key={`item-${index}`}>
               <ListItem button key={item.label} className={styles.item}>
                 {item.icon && (

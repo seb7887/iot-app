@@ -11,6 +11,7 @@ interface Auth {
     email: string,
     password: string
   ) => Promise<Partial<User>>
+  isAdmin: () => boolean
 }
 
 const AuthContext = React.createContext<Auth | null>(null)
@@ -62,10 +63,19 @@ export const AuthProvider: React.FunctionComponent = props => {
     cookie.clearToken()
   }
 
-  const value = React.useMemo(() => ({ signIn, signOut, signUp }), [
+  const isAdmin = () => {
+    if (typeof localStorage !== 'undefined') {
+      const user = JSON.parse(localStorage.getItem('user') || '')
+      return user && user.role === 'admin'
+    }
+    return false
+  }
+
+  const value = React.useMemo(() => ({ signIn, signOut, signUp, isAdmin }), [
     signIn,
     signOut,
-    signUp
+    signUp,
+    isAdmin
   ])
 
   return <AuthContext.Provider value={value} {...props} />
