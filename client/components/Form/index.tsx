@@ -17,7 +17,7 @@ const Form: React.FunctionComponent<Props> = ({
 }) => {
   return (
     <>
-      <FormError error={error} />
+      {error && <FormError error={error} />}
       <Formik
         enableReinitialize
         initialValues={initialValues}

@@ -10,9 +10,10 @@ interface Values {
 
 interface Props {
   onSubmit: (values: Values) => void
+  edit?: boolean
 }
 
-const UsersForm: React.FunctionComponent<Props> = ({ onSubmit }) => {
+const UsersForm: React.FunctionComponent<Props> = ({ onSubmit, edit }) => {
   const [error, setError] = useState<string>('')
   const initialValues: Values = {
     email: '',
@@ -32,10 +33,10 @@ const UsersForm: React.FunctionComponent<Props> = ({ onSubmit }) => {
 
   return (
     <Form initialValues={initialValues} onSubmit={submit} error={error}>
-      <Field name="email" label="Email" />
+      <Field name="email" type="email" label="Email" />
       <Field name="username" label="Username" />
       <Field name="password" label="Password" type="password" />
-      <Submit text="Create" />
+      <Submit text={edit ? 'Edit' : 'Create'} />
     </Form>
   )
 }

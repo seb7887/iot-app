@@ -6,6 +6,8 @@ import Backdrop from '@material-ui/core/Backdrop'
 import Slide from '@material-ui/core/Slide'
 import { TransitionProps } from '@material-ui/core/transitions'
 
+import { useStyles } from './styles'
+
 interface Props {
   title: string
   open: boolean
@@ -24,26 +26,35 @@ const Modal: React.FunctionComponent<Props> = ({
   open,
   onClose,
   children
-}) => (
-  <Dialog
-    aria-labelledby="modal-title"
-    arial-describedby="modal-description"
-    // @ts-ignore
-    TransitionComponent={Transition}
-    open={open}
-    onClose={onClose}
-    closeAfterTransition
-    fullWidth
-    maxWidth="sm"
-    scroll="paper"
-    BackdropComponent={Backdrop}
-    BackdropProps={{
-      timeout: 500
-    }}
-  >
-    <DialogTitle id="dialog-title">{title}</DialogTitle>
-    <DialogContent>{children}</DialogContent>
-  </Dialog>
-)
+}) => {
+  const styles = useStyles()
+
+  return (
+    <Dialog
+      aria-labelledby="modal-title"
+      arial-describedby="modal-description"
+      // @ts-ignore
+      TransitionComponent={Transition}
+      open={open}
+      onClose={onClose}
+      closeAfterTransition
+      fullWidth
+      maxWidth="sm"
+      scroll="paper"
+      BackdropComponent={Backdrop}
+      BackdropProps={{
+        timeout: 500
+      }}
+      PaperProps={{
+        className: styles.root
+      }}
+    >
+      <DialogTitle id="dialog-title" className={styles.title}>
+        {title}
+      </DialogTitle>
+      <DialogContent className={styles.content}>{children}</DialogContent>
+    </Dialog>
+  )
+}
 
 export default Modal

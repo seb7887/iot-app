@@ -12,6 +12,8 @@ import Layout from '../../components/Layout'
 import Toolbar from '../../components/Toolbar'
 import Table from '../../components/Table'
 import Error from '../../components/Error'
+import Modal from '../../components/Modal'
+import UsersForm from '../../components/UsersForm'
 
 interface Props {
   auth: boolean | null
@@ -33,6 +35,7 @@ const Users: NextPage<Props> = ({ initialData }) => {
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
+  const [openModal, setOpenModal] = useState<boolean>(false)
   const router = useRouter()
 
   const formatData = (data: User[]) => {
@@ -70,8 +73,17 @@ const Users: NextPage<Props> = ({ initialData }) => {
     fetcher()
   }, [searchText])
 
+  const handleOpenModal = () => setOpenModal(true)
+
+  const handleCloseModal = () => setOpenModal(false)
+
   const goToUserOverview = (id: string) => {
     router.push(`/users/${id}`)
+  }
+
+  const createUser = (values: Record<string, any>) => {
+    console.log('create user', values)
+    handleCloseModal()
   }
 
   if (error) {
@@ -79,31 +91,44 @@ const Users: NextPage<Props> = ({ initialData }) => {
   }
 
   return (
-    <Layout>
-      <Toolbar header="Users" icon={<UsersIcon />}>
-        <Tooltip title="Add new user">
-          <IconButton color="primary" aria-label="add-user">
-            <AddUserIcon />
-          </IconButton>
-        </Tooltip>
-      </Toolbar>
-      {users && (
-        <Table
-          loading={loading}
-          columns={COLUMNS}
-          rows={formatData(users.users)}
-          count={users.meta.count}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          searchText={searchText}
-          searchPlaceholder="Search by email"
-          onChangePage={setPage}
-          onClickRow={goToUserOverview}
-          onChangeRowsPerPage={setRowsPerPage}
-          onChangeSearch={setSearchText}
-        />
-      )}
-    </Layout>
+    <>
+      <Layout>
+        <Toolbar header="Users" icon={<UsersIcon />}>
+          <Tooltip title="Add new user">
+            <IconButton
+              color="primary"
+              aria-label="add-user"
+              onClick={handleOpenModal}
+            >
+              <AddUserIcon />
+            </IconButton>
+          </Tooltip>
+        </Toolbar>
+        {users && (
+          <Table
+            loading={loading}
+            columns={COLUMNS}
+            rows={formatData(users.users)}
+            count={users.meta.count}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            searchText={searchText}
+            searchPlaceholder="Search by email"
+            onChangePage={setPage}
+            onClickRow={goToUserOverview}
+            onChangeRowsPerPage={setRowsPerPage}
+            onChangeSearch={setSearchText}
+          />
+        )}
+      </Layout>
+      <Modal
+        title="Create New User"
+        open={openModal}
+        onClose={handleCloseModal}
+      >
+        <UsersForm onSubmit={createUser} />
+      </Modal>
+    </>
   )
 }
 

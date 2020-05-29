@@ -104,7 +104,9 @@ const Table: React.FunctionComponent<Props> = ({
       <MuiTable aria-label="table">
         <MuiTableHead className={styles.header}>
           {columns.map(column => (
-            <MuiTableCell align="right">{column}</MuiTableCell>
+            <MuiTableCell align="right" key={column}>
+              {column}
+            </MuiTableCell>
           ))}
         </MuiTableHead>
         <MuiTableBody>

@@ -19,6 +19,7 @@
     "@types/nprogress": "^0.2.0",
     "@types/react": "^16.9.35",
     "@types/react-dom": "^16.9.8",
+    "@types/yup": "^0.29.0",
     "@typescript-eslint/eslint-plugin": "^2.32.0",
     "@typescript-eslint/parser": "^2.32.0",
     "husky": "^4.2.5",
@@ -45,7 +46,8 @@
     "react-countup": "^4.3.3",
     "react-dom": "^16.13.1",
     "swr": "^0.2.0",
-    "universal-cookie": "^4.0.3"
+    "universal-cookie": "^4.0.3",
+    "yup": "^0.29.1"
   },
   "husky": {
     "hooks": {
