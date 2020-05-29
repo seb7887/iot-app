@@ -24,7 +24,6 @@ export default class MyDocument extends Document {
             href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=Rubik+Mono+One&display=swap"
             rel="stylesheet"
           />
-          <link rel="stylesheet" href="nprogress.css" />
         </Head>
         <body>
           <Main />

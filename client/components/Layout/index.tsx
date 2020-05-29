@@ -1,6 +1,5 @@
 import React from 'react'
 import Link from 'next/link'
-import Router from 'next/router'
 import { useRouter } from 'next/router'
 import Drawer from '@material-ui/core/Drawer'
 import Divider from '@material-ui/core/Divider'
@@ -15,7 +14,6 @@ import GroupsIcon from '@material-ui/icons/AccountTreeOutlined'
 import AdminsIcon from '@material-ui/icons/SupervisorAccount'
 import ProfileIcon from '@material-ui/icons/PersonOutline'
 import SignOutIcon from '@material-ui/icons/ExitToApp'
-import NProgress from 'nprogress'
 
 import { useAuth } from '../../context'
 import { useStyles } from './styles'
@@ -53,12 +51,6 @@ const menu: MenuItem[] = [
     tooltip: 'Admins'
   }
 ]
-
-Router.events.on('onRouteChangeStart', () => NProgress.start())
-
-Router.events.on('onRouteChangeComplete', () => NProgress.done())
-
-Router.events.on('onRouteChangeError', () => NProgress.done())
 
 const Layout: React.FunctionComponent = props => {
   const { signOut, isAdmin } = useAuth()
