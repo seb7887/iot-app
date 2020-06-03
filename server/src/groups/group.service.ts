@@ -50,11 +50,15 @@ export class GroupService {
     const isAdmin = role === 'admin'
 
     const subgroups = id && !isAdmin ? await this.getHierarchy(id) : null
+    const parentIdQuery =
+      parentId === 'top'
+        ? `groups.parent_id is null`
+        : `groups.parent_id = :parentId`
 
     const [groups, count] = await getRepository(Group)
       .createQueryBuilder('groups')
       .where(subgroups ? 'groups.id IN (:...subgroups)' : '1=1', { subgroups })
-      .andWhere(parentId ? `groups.parent_id = :parentId` : `1=1`, { parentId })
+      .andWhere(parentId ? `${parentIdQuery}` : `1=1`, { parentId })
       .andWhere(name ? `groups.name LIKE '%${name}%'` : '1=1')
       .orderBy(sortBy, sortOrder)
       .limit(pageSize)
