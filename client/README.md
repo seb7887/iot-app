@@ -18,7 +18,12 @@
   - [ ] logs
 - [ ] groups
   - [ ] main
+    - [x] list
+    - [ ] create
   - [ ] subgroups
+    - [x] list
+    - [ ] delete
+    - [ ] update
 - [x] users
   - [x] list
   - [x] overview

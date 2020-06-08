@@ -19,6 +19,8 @@ interface Props {
   loading: boolean
   error: string
   groups: Group[]
+  onSearch: (text: string) => Promise<void>
+  onClear: () => Promise<void>
 }
 
 const titles = {
@@ -29,7 +31,9 @@ const titles = {
 const GroupList: React.FunctionComponent<Props> = ({
   loading,
   error,
-  groups
+  groups,
+  onSearch,
+  onClear
 }) => {
   const [title, setTitle] = useState<string>(titles.topLevel)
   const [searchText, setSearchText] = useState<string>('')
@@ -38,6 +42,23 @@ const GroupList: React.FunctionComponent<Props> = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target
     setSearchText(value)
+  }
+
+  const handleSearch = async (e: React.SyntheticEvent) => {
+    e.preventDefault()
+    setTitle(titles.searchResults)
+    await onSearch(searchText)
+  }
+
+  const handleClear = async (e: React.SyntheticEvent) => {
+    e.preventDefault()
+    setSearchText('')
+    setTitle(titles.topLevel)
+    await onClear()
+  }
+
+  if (loading) {
+    return <Loader message="Loading Groups..." />
   }
 
   if (!loading && error) {
@@ -60,7 +81,7 @@ const GroupList: React.FunctionComponent<Props> = ({
         </Typography>
       </Grid>
       <Grid item xs={12}>
-        <Paper square className={styles.paper}>
+        <Paper square className={styles.paper} elevation={4}>
           <Typography component="span">
             <Box
               component="p"
@@ -85,10 +106,10 @@ const GroupList: React.FunctionComponent<Props> = ({
               variant="text"
               className={styles.buttonGroup}
             >
-              <Button>
+              <Button onClick={handleClear}>
                 <ClearIcon />
               </Button>
-              <Button disabled={searchText === ''}>
+              <Button disabled={searchText === ''} onClick={handleSearch}>
                 <SearchIcon />
               </Button>
             </ButtonGroup>
